@@ -3,6 +3,7 @@ const userController = require('./../controllers/userController');
 const authController = require('../controllers/authController');
 const authMiddlewers = require('../middlewares/authMiddlewers');
 const imguserMiddlewers = require('../middlewares/imguserMiddlewers');
+const { protect, restrictTo } = require('./../middlewares/authMiddlewers');
 const router = express.Router();
 
 router.post('/login', authController.login);
@@ -14,11 +15,26 @@ router.get('/resetPassword/:token', (req, res) => {
 });
 router.post('/signup', authController.signup);
 // عمليات المستخدم على حسابه الخاص
-router.patch('/updateMe', authMiddlewers.protect, userController.updateMe);
+router.patch('/activeMe', authMiddlewers.protect, userController.activeMe);
+router.get(
+  '/me',
+  authMiddlewers.protect,
+  userController.getMe,
+  userController.getUser,
+);
+router.delete('/deleteMe', authMiddlewers.protect , userController.deleteMe);
+router.patch('/updateMe', authMiddlewers.protect,userController.updateMe);
+router.patch(
+  '/updateMeAndUpload',
+   authMiddlewers.protect,
+  imguserMiddlewers.uploadUserPhoto,
+  userController.updateMe,
+);
 router.patch(
   '/updateMyPassword',
   authMiddlewers.protect,
   authController.updatePassword,
+ authMiddlewers.restrictTo('USER','ADMIN'),
 );
 router
   .route('/')
@@ -39,7 +55,7 @@ router
   .get(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo('ADMIN'),
+    authMiddlewers.restrictTo('ADMIN','USER'),
     userController.getUser, //الحصول على مستخدم معين
   )
   .patch(

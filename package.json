@@ -48,5 +48,8 @@
     "add:property:object": "hygen property add-to-object",
     "postadd:property:object": "npm run format",
     "postadd:property:document": "npm run format"
+  },
+  "engines": {
+  "node": "20.18.0"
   }
 }

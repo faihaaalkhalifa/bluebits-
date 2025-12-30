@@ -99,7 +99,7 @@ app.all('*', (req, res, next) => {
 app.use(errorGlobal);
 
 // 3) الاتصال بقاعدة البيانات وتشغيل الخادم
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 7000;
 const MONGODB_URI = process.env.MONGO_URL;
 
 // التحقق من وجود رابط قاعدة البيانات
@@ -117,7 +117,10 @@ mongoose
     // تشغيل الخادم بعد الاتصال الناجح بقاعدة البيانات
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server is running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}
+Example app listening at http://localhost:${PORT}
+Example app listening at http://localhost:${PORT}/docs`,
+      );
     });
 
     // إعدادات إضافية للخادم
@@ -128,23 +131,6 @@ mongoose
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
-
-// 4) الإغلاق الأنظف للتطبيق
-process.on('SIGINT', () => {
-  console.log('Received SIGINT. Shutting down gracefully');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  });
-});
-
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM. Shutting down gracefully');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  });
-});
 
 // 5) معالجة الأخطاء غير الملتقطة
 process.on('uncaughtException', (err) => {

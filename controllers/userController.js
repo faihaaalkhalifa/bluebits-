@@ -49,11 +49,21 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     200, // رمز الحالة (200 OK)
     'success', // رسالة النجاح
     updatedUser, // المستند المُحدَّث يذهب مباشرةً إلى حقل 'data'
-  ); // تم حذف الكود القديم:
-  // res.status(200).json({
-  //   status: 'success',
-  //   data: {
-  //     user: updatedUser,
-  //   },
-  // });
+  ); 
+});
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user.id, { active: false });
+  res.status(200).json({
+    status: 'success',
+  });
+});
+exports.activeMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user.id, { active: true });
+  res.status(200).json({
+    status: 'success',
+  });
 });
