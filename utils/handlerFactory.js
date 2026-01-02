@@ -1,23 +1,23 @@
-const catchAsync = require('./catchAsync');
-const { successResponse, errorResponse } = require('../utils/response');
-const AppError = require('./appError');
-const APIFeatures = require('./apiFeatures');
+const catchAsync = require("./catchAsync");
+const { successResponse, errorResponse } = require("../utils/response");
+const AppError = require("./appError");
+const APIFeatures = require("./apiFeatures");
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndDelete(req.params.id);
     if (!doc) {
-      return next(new AppError('No document found with that ID', 404));
+      return next(new AppError("No document found with that ID", 404));
     }
-    return successResponse(res, 200, 'success', doc);
+    return successResponse(res, 200, "success", doc);
   });
 exports.delete = (Model, filter) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.deleteMany(filter);
     if (!doc) {
-      return next(new AppError('No document found with that filter', 404));
+      return next(new AppError("No document found with that filter", 404));
     }
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: null,
     });
   });
@@ -28,15 +28,15 @@ exports.updateOne = (Model) =>
       runValidators: true,
     });
     if (!doc) {
-      return next(new AppError('No document found with that ID', 404));
+      return next(new AppError("No document found with that ID", 404));
     }
-    return successResponse(res, 200, 'success', doc);
+    return successResponse(res, 200, "success", doc);
   });
 exports.update = (Model, filter, update) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.updateMany(filter, update);
     res.status(200).json({
-      status: 'success',
+      status: "success",
       doc,
     });
   });
@@ -44,14 +44,14 @@ exports.delete = (Model, filter) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.updateMany(filter);
     res.status(200).json({
-      status: 'success',
+      status: "success",
       doc,
     });
   });
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.create(req.body);
-    return successResponse(res, 200, 'success', doc);
+    return successResponse(res, 200, "success", doc);
   });
 exports.getOne = (Model, ...popOptions) =>
   catchAsync(async (req, res, next) => {
@@ -61,9 +61,9 @@ exports.getOne = (Model, ...popOptions) =>
         query = query.populate(popOptions[i]);
     const doc = await query;
     if (!doc) {
-      return next(new AppError('No document found with that ID', 404));
+      return next(new AppError("No document found with that ID", 404));
     }
-    return successResponse(res, 200, 'success', doc);
+    return successResponse(res, 200, "success", doc);
   });
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
@@ -92,7 +92,7 @@ exports.getAllpop = (Model, pop) =>
     if (req.params.userId) fullter = { user: req.params.userId };
     let features = new APIFeatures(Model.find(), req.query);
     if (pop) {
-      let pop2 = pop.split(' ');
+      let pop2 = pop.split(" ");
       for (let i = 0; i < pop2.length; i++) {
         features.query = features.query.populate({
           path: `${pop2[i]}`,
@@ -103,7 +103,7 @@ exports.getAllpop = (Model, pop) =>
     const doc = await features.query;
     // SEND RESPONSE
     res.status(200).json({
-      status: 'success',
+      status: "success",
       results: doc.length,
       doc,
     });
@@ -119,7 +119,7 @@ exports.getAllpop1 = (Model, ...pop) =>
     const doc = await features.query;
     // SEND RESPONSE
     res.status(200).json({
-      status: 'success',
+      status: "success",
       results: doc.length,
       doc,
     });
@@ -138,7 +138,7 @@ exports.getField = (Model, field, filter) =>
     });
     let doc = [...new Set(arrOpj)];
     res.status(200).json({
-      status: 'success',
+      status: "success",
       results: doc.length,
       doc: doc,
     });
@@ -150,7 +150,7 @@ exports.statisticsWithLink = (Model, price, from, foreignField, ...field) =>
         $lookup: {
           from: from,
           localField: foreignField,
-          foreignField: '_id',
+          foreignField: "_id",
           as: foreignField,
         },
       },
@@ -165,9 +165,9 @@ exports.statisticsWithLink = (Model, price, from, foreignField, ...field) =>
           [field[4]]: 1,
           [field[5]]: 1,
           [field[6]]: 1,
-          year: { $year: '$createdAt' },
-          month: { $month: '$createdAt' },
-          day: { $dayOfMonth: '$createdAt' },
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" },
+          day: { $dayOfMonth: "$createdAt" },
         },
       },
       {
@@ -194,7 +194,7 @@ exports.statisticsWithLink = (Model, price, from, foreignField, ...field) =>
       },
     ]);
     res.status(200).json({
-      status: 'success',
+      status: "success",
       doc,
     });
   });

@@ -1,9 +1,9 @@
-const multer = require('multer');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const multer = require("multer");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 
-const uploadsDir = path.join(__dirname, '../uploads');
-const fs = require('fs');
+const uploadsDir = path.join(__dirname, "../uploads");
+const fs = require("fs");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -20,20 +20,20 @@ const storage = multer.diskStorage({
 // تصفية أنواع الملفات المسموحة
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'application/pdf',
-    'application/zip',
-    'application/x-rar-compressed',
-    'text/plain',
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "application/pdf",
+    "application/zip",
+    "application/x-rar-compressed",
+    "text/plain",
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(
-      new Error('نوع الملف غير مدعوم. يرجى رفع صورة أو PDF أو ملف مضغوط'),
+      new Error("نوع الملف غير مدعوم. يرجى رفع صورة أو PDF أو ملف مضغوط"),
       false,
     );
   }

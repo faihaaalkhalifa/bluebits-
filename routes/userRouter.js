@@ -1,73 +1,73 @@
-const express = require('express');
-const userController = require('./../controllers/userController');
-const authController = require('../controllers/authController');
-const authMiddlewers = require('../middlewares/authMiddlewers');
-const imguserMiddlewers = require('../middlewares/imguserMiddlewers');
-const { protect, restrictTo } = require('./../middlewares/authMiddlewers');
+const express = require("express");
+const userController = require("./../controllers/userController");
+const authController = require("../controllers/authController");
+const authMiddlewers = require("../middlewares/authMiddlewers");
+const imguserMiddlewers = require("../middlewares/imguserMiddlewers");
+const { protect, restrictTo } = require("./../middlewares/authMiddlewers");
 const router = express.Router();
 
-router.post('/login', authController.login);
-router.get('/logout', authController.logout);
-router.post('/forgotPassword', authController.forgotPassword);
-router.patch('/resetPassword/:token', authController.resetPassword);
-router.get('/resetPassword/:token', (req, res) => {
-  res.render('user/resetPassword4');
+router.post("/login", authController.login);
+router.get("/logout", authController.logout);
+router.post("/forgotPassword", authController.forgotPassword);
+router.patch("/resetPassword/:token", authController.resetPassword);
+router.get("/resetPassword/:token", (req, res) => {
+  res.render("user/resetPassword4");
 });
-router.post('/signup', authController.signup);
+router.post("/signup", authController.signup);
 // عمليات المستخدم على حسابه الخاص
-router.patch('/activeMe', authMiddlewers.protect, userController.activeMe);
+router.patch("/activeMe", authMiddlewers.protect, userController.activeMe);
 router.get(
-  '/me',
+  "/me",
   authMiddlewers.protect,
   userController.getMe,
   userController.getUser,
 );
-router.delete('/deleteMe', authMiddlewers.protect , userController.deleteMe);
-router.patch('/updateMe', authMiddlewers.protect,userController.updateMe);
+router.delete("/deleteMe", authMiddlewers.protect, userController.deleteMe);
+router.patch("/updateMe", authMiddlewers.protect, userController.updateMe);
 router.patch(
-  '/updateMeAndUpload',
-   authMiddlewers.protect,
+  "/updateMeAndUpload",
+  authMiddlewers.protect,
   imguserMiddlewers.uploadUserPhoto,
   userController.updateMe,
 );
 router.patch(
-  '/updateMyPassword',
+  "/updateMyPassword",
   authMiddlewers.protect,
   authController.updatePassword,
- authMiddlewers.restrictTo('USER','ADMIN'),
+  authMiddlewers.restrictTo("USER", "ADMIN"),
 );
 router
-  .route('/')
+  .route("/")
   .get(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo('ADMIN'),
+    authMiddlewers.restrictTo("ADMIN"),
     userController.getAllUsers, //,الحصول على جميع المستخدمين
   )
   .post(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo('ADMIN'),
+    authMiddlewers.restrictTo("ADMIN"),
     userController.createUser, //انشاء مستخدم جديد
   );
 router
-  .route('/:id')
+  .route("/:id")
   .get(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo('ADMIN','USER'),
+    authMiddlewers.restrictTo("ADMIN", "USER"),
     userController.getUser, //الحصول على مستخدم معين
   )
   .patch(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo('ADMIN'),
+    authMiddlewers.restrictTo("ADMIN"),
     userController.updateUser, //تحديث مستخدم معين
   )
   .delete(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo('ADMIN'),
+    authMiddlewers.restrictTo("ADMIN"),
     userController.deleteUser, //حذف مستخدم معين
   );
 

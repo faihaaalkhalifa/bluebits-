@@ -1,5 +1,5 @@
-const multer = require('multer');
-const AppError = require('../utils/appError');
+const multer = require("multer");
+const AppError = require("../utils/appError");
 exports.uploadPhoto = (destination, fileNameInModel) => {
   const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -10,10 +10,10 @@ exports.uploadPhoto = (destination, fileNameInModel) => {
     },
   });
   const multerFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image')) {
+    if (file.mimetype.startsWith("image")) {
       cb(null, true);
     } else {
-      cb(new AppError('Not an image! Please upload only images.', 400), false);
+      cb(new AppError("Not an image! Please upload only images.", 400), false);
     }
   };
   const upload = multer({

@@ -1,13 +1,11 @@
 exports.UserStatus = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
+  ACTIVE: "active",
+  INACTIVE: "inactive",
 };
 
 exports.RoleCode = {
-  USER: 'USER',
-  ADMIN: 'ADMIN',
-  BLUE: 'BLUE',
-  DOCTOR: 'DOCTOR',
-
+  USER: "USER",
+  ADMIN: "ADMIN",
+  BLUE: "BLUE",
+  DOCTOR: "DOCTOR",
 };
-

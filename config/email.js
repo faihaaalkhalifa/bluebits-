@@ -1,9 +1,9 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
-    this.firstName = user.name.split(' ')[0];
+    this.firstName = user.name.split(" ")[0];
     this.url = url;
     this.from = process.env.EMAIL_FROM;
   }
@@ -11,7 +11,7 @@ module.exports = class Email {
   newTransport() {
     // استخدام Gmail للإرسال الحقيقي
     return nodemailer.createTransport({
-      service: 'Gmail',
+      service: "Gmail",
       auth: {
         user: process.env.EMAIL_USERNAME,
         pass: process.env.EMAIL_PASSWORD,
@@ -33,12 +33,12 @@ module.exports = class Email {
       const transporter = this.newTransport();
       await transporter.sendMail(mailOptions);
     } catch (error) {
-      console.error('Error sending email:', error);
-      throw new Error('Failed to send email');
+      console.error("Error sending email:", error);
+      throw new Error("Failed to send email");
     }
   }
 
   async sendPasswordReset() {
-    await this.send('BLUE BITS - Password Reset');
+    await this.send("BLUE BITS - Password Reset");
   }
 };
