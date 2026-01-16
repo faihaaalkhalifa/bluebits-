@@ -5,7 +5,7 @@ const { USER, ADMIN, BLUE, DOCTOR } = RoleCode;
 const express = require("express");
 const router = express.Router();
 router.use(protect);
- router
+  router
   .route('/:id/Completed')
   .patch(restrictTo(USER,ADMIN,BLUE,DOCTOR),taskController.Completed);
   router
@@ -22,6 +22,7 @@ router
   .route("/")
   .get(restrictTo(ADMIN), taskController.getAllTask)
   .post(restrictTo(USER, BLUE, DOCTOR), taskController.createTask);
+
 router
   .route("/:id")
   .get(restrictTo(USER, ADMIN, BLUE, DOCTOR), taskController.getTask)

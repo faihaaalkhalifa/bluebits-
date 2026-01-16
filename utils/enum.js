@@ -9,3 +9,12 @@ exports.RoleCode = {
   BLUE: "BLUE",
   DOCTOR: "DOCTOR",
 };
+exports.tasktype = {
+ NORMAL:"NORMAL",
+ DIGITAL:"DIGITAL"
+};
+exports.difficultyLevel = {
+ easy:"easy",
+ medium:"medium",
+ hard:"hard"
+};
