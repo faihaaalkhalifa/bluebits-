@@ -1,5 +1,5 @@
 
-const { Task, createTask, updateTask } = require("./routes/taskSwagger");
+
 const swaggerJsDoc = require("swagger-jsdoc");
 const components = require("./components");
 
@@ -20,9 +20,7 @@ const options = {
     ],
     components: {
       schemas: components,
-      Task,
-      createTask,
-      updateTask,
+   
       parameters: components,
       responses: components,
       securitySchemes: {

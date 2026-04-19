@@ -8,13 +8,5 @@ exports.RoleCode = {
   ADMIN: "ADMIN",
   BLUE: "BLUE",
   DOCTOR: "DOCTOR",
-};
-exports.tasktype = {
- NORMAL:"NORMAL",
- DIGITAL:"DIGITAL"
-};
-exports.difficultyLevel = {
- easy:"easy",
- medium:"medium",
- hard:"hard"
+  SUPER_ADMIN: "SUPER_ADMIN",
 };

@@ -46,6 +46,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    //حالة الحظر
+   isBanned: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

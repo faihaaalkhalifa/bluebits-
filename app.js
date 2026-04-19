@@ -1,4 +1,4 @@
-const taskRouter = require("./routes/taskRoutes");
+
 const express = require("express");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
@@ -92,7 +92,6 @@ app.get('/favicon.ico', (req, res) => {
 const userRouter = require("./routes/userRouter"); // أضف const هنا
 
 app.use("/api/v1.0.0/users", userRouter);
-app.use("/api/v1.0.0/tasks", taskRouter);
 
 // 6) الصفحة الرئيسية
 app.get("/", (req, res) => {

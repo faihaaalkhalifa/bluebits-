@@ -34,20 +34,20 @@ router.patch(
   "/updateMyPassword",
   authMiddlewers.protect,
   authController.updatePassword,
-  authMiddlewers.restrictTo("USER", "ADMIN"),
+  authMiddlewers.restrictTo("USER", "SUPER_ADMIN","ADMIN"),
 );
 router
   .route("/")
   .get(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo("ADMIN"),
+    authMiddlewers.restrictTo("ADMIN","SUPER_ADMIN"),
     userController.getAllUsers, //,الحصول على جميع المستخدمين
   )
   .post(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo("ADMIN"),
+    authMiddlewers.restrictTo("ADMIN","SUPER_ADMIN"),
     userController.createUser, //انشاء مستخدم جديد
   );
 router
@@ -55,19 +55,19 @@ router
   .get(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo("ADMIN", "USER"),
+    authMiddlewers.restrictTo("ADMIN", "USER", "SUPER_ADMIN"),
     userController.getUser, //الحصول على مستخدم معين
   )
   .patch(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo("ADMIN"),
+    authMiddlewers.restrictTo("SUPER_ADMIN"),
     userController.updateUser, //تحديث مستخدم معين
   )
   .delete(
     authMiddlewers.protect,
     authMiddlewers.isactive,
-    authMiddlewers.restrictTo("ADMIN"),
+    authMiddlewers.restrictTo("ADMIN", "SUPER_ADMIN"),
     userController.deleteUser, //حذف مستخدم معين
   );
 
