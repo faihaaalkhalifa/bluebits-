@@ -1,6 +1,5 @@
-
-
 const swaggerJsDoc = require("swagger-jsdoc");
+const path = require("path");
 const components = require("./components");
 
 const options = {
@@ -15,12 +14,11 @@ const options = {
     servers: [
       {
         url: "http://localhost:7000/api/v1.0.0",
-        description: "Development server",
+        description: "API Server",
       },
     ],
     components: {
       schemas: components,
-   
       parameters: components,
       responses: components,
       securitySchemes: {
@@ -32,7 +30,7 @@ const options = {
       },
     },
   },
-  apis: ["./swagger/routes/*.js"], // اقرأ الملفات مباشرة
+  apis: [path.resolve(__dirname, "./routes/*.js")],
 };
 
 const swaggerSpec = swaggerJsDoc(options);
