@@ -1,3 +1,4 @@
+
 const express = require("express");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
@@ -38,21 +39,6 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again in an hour!",
 });
 app.use("/api", limiter);
-app.set("trust proxy", 1);
-
-// Rate Limiter for Email Verification (to prevent spam)
-const resendVerificationLimiter = rateLimit({
-  max: 5,
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  message: "تم تجاوز حد الطلبات. حاول مرة أخرى لاحقاً!",
-  skipSuccessfulRequests: false,
-  keyGenerator: (req) => {
-    return `${req.body.email || "no-email"}`;
-  },
-});
-
-// Apply the limiter to resendVerification route (will be used in routes)
-app.resendVerificationLimiter = resendVerificationLimiter;
 
 // تحليل الجسم من الطلبات
 app.use(express.json({ limit: "10kb" }));
@@ -98,7 +84,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 
 // 4) معالجة favicon - حل واحد فقط
-app.get("/favicon.ico", (req, res) => {
+app.get('/favicon.ico', (req, res) => {
   res.status(204).end(); // No Content (الأفضل لـ APIs)
 });
 
@@ -179,7 +165,7 @@ app.get("/", (req, res) => {
             
             <div class="info">
                 <p><strong>Port:</strong> ${PORT}</p>
-                <p><strong>Environment:</strong> ${process.env.NODE_ENV || "development"}</p>
+                <p><strong>Environment:</strong> ${process.env.NODE_ENV || 'development'}</p>
                 <p><strong>API Version:</strong> 1.0.0</p>
             </div>
             
@@ -220,8 +206,8 @@ app.get("/", (req, res) => {
 });
 
 // 7) Redirect للـ Swagger Docs
-app.get("/docs", (req, res) => res.redirect("/api-docs"));
-app.get("/docs/", (req, res) => res.redirect("/api-docs"));
+app.get('/docs', (req, res) => res.redirect('/api-docs'));
+app.get('/docs/', (req, res) => res.redirect('/api-docs'));
 
 // 8) Swagger documentation
 app.use(
@@ -233,8 +219,8 @@ app.use(
     customSiteTitle: "Task Manager API Documentation",
     swaggerOptions: {
       persistAuthorization: true,
-      docExpansion: "none",
-    },
+      docExpansion: 'none'
+    }
   }),
 );
 
@@ -257,7 +243,7 @@ if (!MONGODB_URI) {
 }
 
 // إعدادات Mongoose
-mongoose.set("strictQuery", true);
+mongoose.set('strictQuery', true);
 
 // الاتصال بقاعدة البيانات
 mongoose
@@ -275,51 +261,52 @@ mongoose
       console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
       console.log(`API Docs: http://localhost:${PORT}/api-docs`);
       console.log(`Homepage: http://localhost:${PORT}`);
+      
     });
 
     // إعدادات إضافية للخادم
     server.keepAliveTimeout = 120000; // 120 ثانية
     server.headersTimeout = 120000; // 120 ثانية
-    // إغلاق نظيف عند إشارات النظام
-    process.on("SIGTERM", async () => {
-      console.log("SIGTERM signal received: closing HTTP server");
-
-      try {
-        await new Promise((resolve) => {
-          server.close(resolve);
-        });
-
-        console.log("HTTP server closed");
-
-        await mongoose.connection.close();
-        console.log("MongoDB connection closed");
-
-        process.exit(0);
-      } catch (err) {
-        console.error("Error during shutdown:", err);
-        process.exit(1);
-      }
+  // إغلاق نظيف عند إشارات النظام
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  
+  try {
+    await new Promise((resolve) => {
+      server.close(resolve);
     });
+    
+    console.log('HTTP server closed');
+    
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed');
+    
+    process.exit(0);
+  } catch (err) {
+    console.error('Error during shutdown:', err);
+    process.exit(1);
+  }
+});
 
-    process.on("SIGINT", async () => {
-      console.log("SIGINT signal received: closing HTTP server");
-
-      try {
-        await new Promise((resolve) => {
-          server.close(resolve);
-        });
-
-        console.log("HTTP server closed");
-
-        await mongoose.connection.close();
-        console.log("MongoDB connection closed");
-
-        process.exit(0);
-      } catch (err) {
-        console.error("Error during shutdown:", err);
-        process.exit(1);
-      }
+process.on('SIGINT', async () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  
+  try {
+    await new Promise((resolve) => {
+      server.close(resolve);
     });
+    
+    console.log('HTTP server closed');
+    
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed');
+    
+    process.exit(0);
+  } catch (err) {
+    console.error('Error during shutdown:', err);
+    process.exit(1);
+  }
+});  
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
@@ -331,7 +318,7 @@ mongoose
 process.on("uncaughtException", (err) => {
   console.error("🔥 Uncaught Exception:", err.message);
   console.error(err.stack);
-
+  
   // إعطاء وقت للتسجيل قبل الخروج
   setTimeout(() => {
     process.exit(1);
@@ -341,7 +328,7 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (reason, promise) => {
   console.error("💥 Unhandled Rejection at:", promise);
   console.error("Reason:", reason);
-
+  
   // إعطاء وقت للتسجيل قبل الخروج
   setTimeout(() => {
     process.exit(1);
