@@ -11,5 +11,5 @@ exports.uploadLecture = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 100 * 1024 * 1024 },
 });
-
+// 1
 exports.cloudinary = cloudinary;

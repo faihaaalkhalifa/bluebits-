@@ -18,7 +18,7 @@ router
     restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
     uploadLecture.single('lecture'),
     (req, res, next) => {
-      // ← أضف هذا لتشخيص المشكلة
+  
       console.log('Body after multer:', req.body);
       next();
     },

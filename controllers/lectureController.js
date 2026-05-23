@@ -7,7 +7,7 @@ const factory = require('../utils/handlerFactory');
 const streamifier = require('streamifier');
 const axios = require('axios');
 
-// ← دوال مساعدة في الأعلى
+// دوال مساعدة 
 const uploadToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
