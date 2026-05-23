@@ -265,3 +265,102 @@ exports.InvalidCurrentPassword = {
     },
   },
 };
+// ============ SUBJECT SCHEMAS ============
+
+exports.Subject = {
+  type: "object",
+  properties: {
+    _id: { type: "string", example: "6a12078e8719e7571f0662d6" },
+    name: { type: "string", example: "إدارة شبكات" },
+    description: { type: "string", example: "مادة تابعة لقسم الشبكات" },
+    difficultyDefault: { type: "number", example: 3 },
+    studyDaysDefault: { type: "number", example: 7 },
+    examDuration: { type: "number", example: 120 },
+    createdBy: {
+      type: "object",
+      properties: {
+        _id: { type: "string", example: "69ee50bff8208eb66bcc3cc0" },
+        name: { type: "string", example: "faihaa" },
+        email: { type: "string", example: "faihaa@gmail.com" },
+      },
+    },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
+  },
+};
+
+exports.createSubject = {
+  type: "object",
+  required: ["name"],
+  properties: {
+    name: { type: "string", example: "إدارة شبكات" },
+    description: { type: "string", example: "مادة تابعة لقسم الشبكات" },
+    difficultyDefault: { type: "number", example: 3 },
+    studyDaysDefault: { type: "number", example: 7 },
+    examDuration: { type: "number", example: 120 },
+  },
+};
+
+exports.updateSubject = {
+  type: "object",
+  properties: {
+    name: { type: "string", example: "إدارة شبكات" },
+    description: { type: "string", example: "وصف محدث" },
+    difficultyDefault: { type: "number", example: 4 },
+    studyDaysDefault: { type: "number", example: 10 },
+    examDuration: { type: "number", example: 90 },
+  },
+};
+// ============ LECTURE SCHEMAS ============
+
+exports.Lecture = {
+  type: "object",
+  properties: {
+    _id: { type: "string", example: "6a0b7b0b545a9571b9673a72" },
+    title: { type: "string", example: "محاضرة الأولى" },
+    description: { type: "string", example: "شرح مفصل للمحاضرة الأولى" },
+    uploadedBy: {
+      type: "object",
+      properties: {
+        _id: { type: "string", example: "69ee50bff8208eb66bcc3cc0" },
+        name: { type: "string", example: "faihaa" },
+        email: { type: "string", example: "faihaa@gmail.com" },
+      },
+    },
+    subjectId: {
+      type: "object",
+      properties: {
+        _id: { type: "string", example: "6a12078e8719e7571f0662d6" },
+        name: { type: "string", example: "إدارة شبكات" },
+      },
+    },
+    isPublished: { type: "boolean", example: true },
+    fileUrl: { type: "string", example: "https://res.cloudinary.com/..." },
+    fileSize: { type: "number", example: 2381458 },
+    fileType: { type: "string", example: "image/png" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
+  },
+};
+
+exports.createLecture = {
+  type: "object",
+  required: ["title", "subjectId"],
+  properties: {
+    title: { type: "string", example: "محاضرة الأولى" },
+    description: { type: "string", example: "شرح مفصل للمحاضرة الأولى" },
+    subjectId: { type: "string", example: "6a12078e8719e7571f0662d6" },
+    isPublished: { type: "boolean", example: false },
+    lecture: { type: "string", format: "binary" },
+  },
+};
+
+exports.updateLecture = {
+  type: "object",
+  properties: {
+    title: { type: "string", example: "محاضرة معدلة" },
+    description: { type: "string", example: "وصف محدث" },
+    isPublished: { type: "boolean", example: true },
+    lecture: { type: "string", format: "binary" },
+  },
+};

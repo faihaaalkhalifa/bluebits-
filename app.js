@@ -89,9 +89,13 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 // 5) ROUTES
-const userRouter = require("./routes/userRouter"); // أضف const هنا
-
+const userRouter = require("./routes/userRouter"); 
+const lectureRouter = require('./routes/lectureRoutes');
+const subjectRouter = require('./routes/subjectRoutes');
+app.use('/api/v1.0.0/subjects', subjectRouter);
+app.use('/api/v1.0.0/lectures', lectureRouter);
 app.use("/api/v1.0.0/users", userRouter);
+
 
 // 6) الصفحة الرئيسية
 app.get("/", (req, res) => {
