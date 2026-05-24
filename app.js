@@ -92,6 +92,11 @@ app.get('/favicon.ico', (req, res) => {
 const userRouter = require("./routes/userRouter"); 
 const lectureRouter = require('./routes/lectureRoutes');
 const subjectRouter = require('./routes/subjectRoutes');
+const yearRouter = require('./routes/yearRoutes');
+const semesterRouter = require('./routes/semesterRoutes');
+
+app.use('/api/v1.0.0/years', yearRouter);
+app.use('/api/v1.0.0/semesters', semesterRouter);
 app.use('/api/v1.0.0/subjects', subjectRouter);
 app.use('/api/v1.0.0/lectures', lectureRouter);
 app.use("/api/v1.0.0/users", userRouter);

@@ -8,17 +8,20 @@ const subjectSchema = new mongoose.Schema(
       trim: true,
     },
 
+  
     // FK → Year
-   // yearId: {
-     // type: mongoose.Schema.ObjectId,
-      //ref: 'Year',
-    //},
+  yearId: {
+  type: mongoose.Schema.ObjectId,
+  ref: 'Year',
+  required: [true, 'السنة مطلوبة'],
+},
 
     // FK → Semester
-    //semesterId: {
-      //type: mongoose.Schema.ObjectId,
-      //ref: 'Semester',
-    //},
+   semesterId: {
+  type: mongoose.Schema.ObjectId,
+  ref: 'Semester',
+  required: [true, 'الفصل مطلوب'],
+},
 
     // FK → Department
     //departmentId: {
@@ -60,8 +63,8 @@ const subjectSchema = new mongoose.Schema(
 );
 
 subjectSchema.pre(/^find/, function (next) {
-  this//.populate({ path: 'yearId', select: 'name order' })
-      //.populate({ path: 'semesterId', select: 'name' })
+  this.populate({ path: 'yearId', select: 'name order' })
+      .populate({ path: 'semesterId', select: 'name' })
       //.populate({ path: 'departmentId', select: 'name' })
       //.populate({ path: 'groupId', select: 'name' })
       .populate({ path: 'createdBy', select: 'name email' });

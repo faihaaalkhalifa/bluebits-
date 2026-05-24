@@ -10,3 +10,7 @@ exports.RoleCode = {
   DOCTOR: "DOCTOR",
   SUPER_ADMIN: "SUPER_ADMIN",
 };
+exports.SubjectType = {
+  THEORETICAL: "theoretical",
+  PRACTICAL: "practical",
+};
