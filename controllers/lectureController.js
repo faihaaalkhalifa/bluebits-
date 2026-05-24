@@ -2,11 +2,11 @@ const Lecture = require('../models/lectureModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { successResponse } = require('../utils/response');
+const Subject = require('../models/subjectModel');
 const { cloudinary } = require('../config/cloudinary');
 const factory = require('../utils/handlerFactory');
 const streamifier = require('streamifier');
 const axios = require('axios');
-
 // دوال مساعدة 
 const uploadToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
@@ -40,6 +40,7 @@ exports.createLecture = catchAsync(async (req, res, next) => {
     title: req.body.title,
     description: req.body.description,
       subjectId: req.body.subjectId,
+      type: req.body.type,
     isPublished: req.body.isPublished === 'true',
     uploadedBy: req.user._id,
     fileUrl: result.secure_url,
@@ -137,3 +138,90 @@ exports.downloadLecture = catchAsync(async (req, res, next) => {
 
 exports.getAllLectures = factory.getAll(Lecture);
 exports.getLecture = factory.getOne(Lecture);
+
+//  عدد المحاضرات من كل مادة
+exports.getLecturesCountPerSubject = catchAsync(async (req, res, next) => {
+  const data = await Lecture.aggregate([
+    {
+      $group: {
+        _id: '$subjectId',
+        totalLectures: { $sum: 1 },
+        theoreticalCount: {
+          $sum: { $cond: [{ $eq: ['$type', 'theoretical'] }, 1, 0] },
+        },
+        practicalCount: {
+          $sum: { $cond: [{ $eq: ['$type', 'practical'] }, 1, 0] },
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: 'subjects',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'subject',
+      },
+    },
+    { $unwind: '$subject' },
+    {
+      $project: {
+        _id: 0,
+        subjectId: '$_id',
+        subjectName: '$subject.name',
+        totalLectures: 1,
+        theoreticalCount: 1,
+        practicalCount: 1,
+      },
+    },
+  ]);
+
+  return successResponse(res, 200, 'success', data);
+});
+
+// 2. محاضرات مادة معينة حسب النوع (عملي أو نظري)
+exports.getLecturesByType = catchAsync(async (req, res, next) => {
+  const { subjectId, type } = req.params;
+
+  if (!['theoretical', 'practical'].includes(type)) {
+    return next(new AppError('النوع يجب أن يكون theoretical أو practical', 400));
+  }
+
+  const lectures = await Lecture.find({ subjectId, type });
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${lectures.length}`,
+    { count: lectures.length, lectures }
+  );
+});
+
+// 3. محاضرات حسب السنة والفصل والمادة والنوع
+exports.getLecturesByYearSemesterSubjectType = catchAsync(async (req, res, next) => {
+  const { yearId, semesterId, subjectId, type } = req.params;
+
+  // تحقق من المادة تابعة للسنة والفصل
+  const subject = await require('../models/subjectModel').findOne({
+    _id: subjectId,
+    yearId,
+    semesterId,
+  });
+
+  if (!subject) {
+    return next(new AppError('المادة غير موجودة في هذه السنة أو الفصل', 404));
+  }
+
+  const filter = { subjectId };
+  if (type && ['theoretical', 'practical'].includes(type)) {
+    filter.type = type;
+  }
+
+  const lectures = await Lecture.find(filter);
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${lectures.length}`,
+    { count: lectures.length, type: type || 'all', lectures }
+  );
+});

@@ -55,5 +55,26 @@ router
     restrictTo('USER', 'ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
     lectureController.downloadLecture
   );
+  
+  router
+  .route('/stats/per-subject')
+  .get(
+    restrictTo('USER', 'ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    lectureController.getLecturesCountPerSubject
+  );
+
+router
+  .route('/subject/:subjectId/type/:type')
+  .get(
+    restrictTo('USER', 'ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    lectureController.getLecturesByType
+  );
+
+router
+  .route('/year/:yearId/semester/:semesterId/subject/:subjectId/type/:type')
+  .get(
+    restrictTo('USER', 'ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    lectureController.getLecturesByYearSemesterSubjectType
+  );
 
 module.exports = router;

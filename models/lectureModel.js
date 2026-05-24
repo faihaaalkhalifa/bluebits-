@@ -16,6 +16,12 @@ const lectureSchema = new mongoose.Schema(
   ref: 'Subject',
   required: [true, 'المادة مطلوبة'],
 },
+  type: {
+  type: String,
+  enum: ['theoretical', 'practical'],
+  required: [true, 'نوع المحاضرة مطلوب'],
+},
+
     uploadedBy: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
