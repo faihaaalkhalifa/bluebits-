@@ -86,3 +86,13 @@ exports.isactive = (req, res, next) => {
   }
   next();
 };
+
+// Check if email is verified
+exports.isEmailVerified = (req, res, next) => {
+  if (!req.user.isVerified) {
+    return next(
+      new AppError("يرجى تفعيل بريدك الإلكتروني أولاً قبل استخدام النظام", 403),
+    );
+  }
+  next();
+};

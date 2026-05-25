@@ -1,5 +1,6 @@
+
+
 const swaggerJsDoc = require("swagger-jsdoc");
-const path = require("path");
 const components = require("./components");
 const options = {
   definition: {
@@ -14,6 +15,7 @@ const options = {
       {
         url: "http://localhost:7000/api/v1.0.0",
         description: "Development server",
+<<<<<<< HEAD
       },
       {
         url: process.env.API_URL || "https://bluebits24.onrender.com/api/v1.0.0",
@@ -22,6 +24,13 @@ const options = {
     ],
     components: {
        schemas: components,
+=======
+      },
+    ],
+    components: {
+      schemas: components,
+   
+>>>>>>> origin/feature/email-verification
       parameters: components,
       responses: components,
       securitySchemes: {
@@ -33,7 +42,7 @@ const options = {
       },
     },
   },
-  apis: [path.resolve(__dirname, "./routes/*.js")],
+  apis: ["./swagger/routes/*.js"], // اقرأ الملفات مباشرة
 };
 
 const swaggerSpec = swaggerJsDoc(options);

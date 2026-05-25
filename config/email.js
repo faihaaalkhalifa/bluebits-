@@ -41,4 +41,36 @@ module.exports = class Email {
   async sendPasswordReset() {
     await this.send("BLUE BITS - Password Reset");
   }
+
+  async sendVerificationEmail() {
+    await this.send("BLUE BITS - Email Verification (Valid for 24h)");
+  }
+
+  async sendVerification() {
+    try {
+      const mailOptions = {
+        from: this.from,
+        to: this.to,
+        subject: "BLUE BITS - Email Verification",
+        html: `
+          <h2>أهلا ${this.firstName}! 👋</h2>
+          <p>شكراً لتسجيلك في منصة BLUE BITS</p>
+          <p>الرجاء الضغط على الرابط أدناه لتفعيل حسابك (الرابط صالح لمدة 24 ساعة):</p>
+          <a href="${this.url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            تفعيل الحساب
+          </a>
+          <p>أو انسخ هذا الرابط:</p>
+          <p>${this.url}</p>
+          <hr>
+          <p>إذا لم تقم بإنشاء حساب، تجاهل هذا البريد.</p>
+        `,
+      };
+
+      const transporter = this.newTransport();
+      await transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      throw new Error("Failed to send verification email");
+    }
+  }
 };

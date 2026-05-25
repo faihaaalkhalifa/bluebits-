@@ -40,13 +40,11 @@ exports.update = (Model, filter, update) =>
       doc,
     });
   });
-exports.delete = (Model, filter) =>
+// deleteMany helper: remove documents by filter and return unified response
+exports.deleteMany = (Model, filter) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.updateMany(filter);
-    res.status(200).json({
-      status: "success",
-      doc,
-    });
+    await Model.deleteMany(filter);
+    return successResponse(res, 200, "success", null);
   });
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
