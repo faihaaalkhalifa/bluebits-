@@ -1,21 +1,19 @@
-
-
 const swaggerJsDoc = require("swagger-jsdoc");
+const path = require("path");
 const components = require("./components");
+
 const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Event Manager API",
+      title: "BlueBits API",
       version: "v1.0.0",
-      description:
-        "API for managing local events and activities - Event Manager Project",
+      description: "API for managing BlueBits educational platform",
     },
-     servers: [
+    servers: [
       {
         url: "http://localhost:7000/api/v1.0.0",
         description: "Development server",
-<<<<<<< HEAD
       },
       {
         url: process.env.API_URL || "https://bluebits24.onrender.com/api/v1.0.0",
@@ -23,14 +21,7 @@ const options = {
       },
     ],
     components: {
-       schemas: components,
-=======
-      },
-    ],
-    components: {
       schemas: components,
-   
->>>>>>> origin/feature/email-verification
       parameters: components,
       responses: components,
       securitySchemes: {
@@ -42,7 +33,7 @@ const options = {
       },
     },
   },
-  apis: ["./swagger/routes/*.js"], // اقرأ الملفات مباشرة
+  apis: [path.resolve(__dirname, "./routes/*.js")],
 };
 
 const swaggerSpec = swaggerJsDoc(options);
