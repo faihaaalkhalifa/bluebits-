@@ -40,7 +40,6 @@ exports.signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    //  property signup
   });
 
   // Generate email verification token
@@ -52,29 +51,28 @@ exports.signup = catchAsync(async (req, res, next) => {
     "host",
   )}/api/v1.0.0/users/verifyEmail/${verificationToken}`;
 
-  try {
-    // Send verification email
-    await new Email(newUser, verificationURL).sendVerification();
+  //   إرسال الإيميل في الخلفية (بدون انتظار)
+  new Email(newUser, verificationURL)
+    .sendVerification()
+    .catch((err) => {
+      console.error(" فشل إرسال الإيميل في الخلفية:", err);
+      // ما رح نحذف المستخدم، بس نسجل الخطأ
+    });
 
-    // Return success response
-    return successResponse(
-      res,
-      200,
-      "تم إرسال رابط التفعيل إلى بريدك الإلكتروني بنجاح. يرجى التحقق من بريدك الآن.",
-      {
-        message: "تم إنشاء الحساب بنجاح. تحقق من بريدك لتفعيل الحساب.",
+  //  رد للمستخدم فوراً بدون انتظار الإيميل
+  return successResponse(
+    res,
+    200,
+    "تم إنشاء حسابك بنجاح عزيزي البت😁 سيتم إرسال رابط التفعيل إلى بريدك الإلكتروني خلال دقائق.",
+    {
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
       },
-    );
-  } catch (error) {
-    // Delete user if email sending failed
-    await User.deleteOne({ _id: newUser._id });
-    return next(
-      new AppError(
-        "حدث خطأ أثناء إرسال البريد الإلكتروني. يرجى المحاولة لاحقاً!",
-        500,
-      ),
-    );
-  }
+      message: "😏خدلك نظرة على البريد ",
+    },
+  );
 });
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -90,7 +88,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 3) Check if email is verified
   if (!user.isVerified) {
-    return next(new AppError("يرجى تفعيل بريدك الإلكتروني أولاً", 403));
+    return next(new AppError("مو قلنا فعل الحساب أول 😐", 403));
   }
 
   // 4) If everything ok, send token to client
@@ -128,7 +126,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       .split("/", 4)
       .join("/")}/resetPassword/${resetToken}`;
 
-    await new Email(user, resetURL).sendPasswordReset(); // 🚀 استبدال الرد القديم بالرد الموحد الجديد
+    await new Email(user, resetURL).sendPasswordReset(); //  استبدال الرد القديم بالرد الموحد الجديد
 
     return successResponse(
       res,
@@ -174,8 +172,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = undefined;
   await user.save(); // 3) Update changedPasswordAt property for the user
   // 4) Log the user in, send JWT
-  // 🚀 هذا الرد يستخدم createSendToken (التي أصبحت موحدة)
-  return createSendToken(user, 200, req, res); // 👈🏽 إضافة 'return' للإنهاء
+  //  هذا الرد يستخدم createSendToken (التي أصبحت موحدة)
+  return createSendToken(user, 200, req, res); // إضافة 'return' للإنهاء
 });
 exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
@@ -187,8 +185,8 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.password = req.body.password;
   await user.save(); // User.findByIdAndUpdate will NOT work as intended!
   // 4) Log user in, send JWT
-  // 🚀 هذا الرد يستخدم createSendToken (التي أصبحت موحدة)
-  return createSendToken(user, 200, req, res); // 👈🏽 إضافة 'return' للإنهاء
+  //  هذا الرد يستخدم createSendToken (التي أصبحت موحدة)
+  return createSendToken(user, 200, req, res); //  إضافة 'return' للإنهاء
 });
 
 // Email Verification
@@ -223,10 +221,8 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
 
 // Resend Verification Email
 exports.resendVerification = catchAsync(async (req, res, next) => {
-  // 1) Get user from email
   const user = await User.findOne({ email: req.body.email });
 
-  // 2) If user doesn't exist, return generic message (security best practice)
   if (!user) {
     return successResponse(
       res,
@@ -236,12 +232,10 @@ exports.resendVerification = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 3) If already verified, return error
   if (user.isVerified) {
-    return next(new AppError("الحساب مفعل بالفعل", 400));
+    return next(new AppError("😁علفكرة تفعيل الحساب مرة وحدة حسابك مفعل ", 400));
   }
 
-  // 4) Check cooldown - prevent spam (60 seconds between requests)
   if (
     user.lastVerificationSentAt &&
     Date.now() - user.lastVerificationSentAt < 60 * 1000
@@ -249,39 +243,25 @@ exports.resendVerification = catchAsync(async (req, res, next) => {
     return next(new AppError("انتظر دقيقة واحدة قبل إعادة الإرسال", 429));
   }
 
-  // 5) Generate new verification token
   const verificationToken = user.createEmailVerificationToken();
   user.lastVerificationSentAt = Date.now();
-
   await user.save({ validateBeforeSave: false });
 
-  // 6) Create verification URL
   const verificationURL = `${req.protocol}://${req.get(
     "host",
   )}/api/v1.0.0/users/verifyEmail/${verificationToken}`;
 
-  try {
-    // 7) Send verification email
-    await new Email(user, verificationURL).sendVerification();
+  //  إرسال الإيميل في الخلفية
+  new Email(user, verificationURL)
+    .sendVerification()
+    .catch((err) => {
+      console.error(" فشل إعادة إرسال الإيميل:", err);
+    });
 
-    return successResponse(
-      res,
-      200,
-      "تم إعادة إرسال رابط التفعيل بنجاح. تحقق من بريدك الإلكتروني",
-      null,
-    );
-  } catch (error) {
-    // Reset verification fields if email fails
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpires = undefined;
-    user.lastVerificationSentAt = undefined;
-    await user.save({ validateBeforeSave: false });
-
-    return next(
-      new AppError(
-        "حدث خطأ أثناء إرسال البريد الإلكتروني. يرجى المحاولة لاحقاً!",
-        500,
-      ),
-    );
-  }
+  return successResponse(
+    res,
+    200,
+    "تم إعادة إرسال رابط التفعيل تحقق من بريدك الإلكتروني خلال دقائق",
+    null,
+  );
 });
