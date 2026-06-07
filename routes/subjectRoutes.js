@@ -17,6 +17,24 @@ router
     subjectController.setCreatedBy,
     subjectController.createSubject
   );
+  router
+  .route('/year/:yearId')
+  .get(
+    restrictTo('USER', 'ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    subjectController.getSubjectsByYear
+  );
+  router
+  .route('/semester/:semesterId')
+  .get(
+    restrictTo('USER', 'ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    subjectController.getSubjectsBySemester
+  );
+  router
+  .route('/year/:yearId/semester/:semesterId')
+  .get(
+    restrictTo('USER', 'ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    subjectController.getSubjectsByYearAndSemester
+  );
 
 router
   .route('/:id')
