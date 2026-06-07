@@ -29,7 +29,7 @@ const lectureSchema = new mongoose.Schema(
     },
     isPublished: {
       type: Boolean,
-      default: true,
+      default:false,
     },
     fileUrl: {
       type: String,

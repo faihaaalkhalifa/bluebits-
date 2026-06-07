@@ -7,56 +7,93 @@ const { cloudinary } = require('../config/cloudinary');
 const factory = require('../utils/handlerFactory');
 const streamifier = require('streamifier');
 const axios = require('axios');
-// دوال مساعدة 
-const uploadToCloudinary = (buffer) => {
+
+// ========== دالة مساعدة لاستخراج نوع الملف من اسم الملف ==========
+const getMimeTypeFromFileName = (fileName) => {
+  const ext = fileName.split('.').pop().toLowerCase();
+  const mimeTypes = {
+    'pdf': 'application/pdf',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'mp4': 'video/mp4',
+    'mov': 'video/quicktime',
+    'avi': 'video/x-msvideo',
+    'mkv': 'video/x-matroska',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  };
+  return mimeTypes[ext] || 'application/octet-stream';
+};
+
+// ========== دالة الرفع إلى Cloudinary ==========
+const uploadToCloudinary = (buffer, mimetype) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 'bluebits/lectures', resource_type: 'auto' },
+      { 
+        folder: 'bluebits/lectures', 
+        resource_type: 'auto', 
+      },
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
+        if (error) {
+          console.error('خطأ في Cloudinary:', error);
+          reject(error);
+        } else {
+          resolve(result);
+        }
       }
     );
     streamifier.createReadStream(buffer).pipe(uploadStream);
   });
 };
-
 const getResourceType = (fileUrl) => {
-  if (!fileUrl) return 'image';
+  if (!fileUrl) return 'raw'; // الافتراضي للملفات
   const ext = fileUrl.split('.').pop().split('?')[0].toLowerCase();
+  
   if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) return 'video';
-  if (['pdf', 'doc', 'docx', 'ppt', 'pptx'].includes(ext)) return 'raw';
-  return 'image';
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
+  
+  // الـ pdf, doc, ppt وكل شيء تاني يعتبر raw
+  return 'raw'; 
 };
-// رفع محاضرة جديدة
+// ========== رفع محاضرة جديدة ==========
 exports.createLecture = catchAsync(async (req, res, next) => {
+
   if (!req.file) {
     return next(new AppError('يرجى رفع ملف المحاضرة', 400));
   }
 
-  const result = await uploadToCloudinary(req.file.buffer);
+  const correctFileType = getMimeTypeFromFileName(req.file.originalname);
 
+  const result = await uploadToCloudinary(req.file.buffer, correctFileType);
+
+let isPublishedValue = false;
+const isPublishedRaw = req.body.isPublished ? req.body.isPublished.toString().trim() : '';
+if (isPublishedRaw === 'true' || isPublishedRaw === '1') {
+  isPublishedValue = true;
+}
+  // حفظ في قاعدة البيانات
   const lecture = await Lecture.create({
     title: req.body.title,
     description: req.body.description,
-      subjectId: req.body.subjectId,
-      type: req.body.type,
-    isPublished: req.body.isPublished === 'true',
+    subjectId: req.body.subjectId,
+    type: req.body.type,
+    isPublished: isPublishedValue,
     uploadedBy: req.user._id,
     fileUrl: result.secure_url,
     publicId: result.public_id,
     fileSize: req.file.size,
-    fileType: req.file.mimetype,
+    fileType: correctFileType,
   });
 
-  return successResponse(res, 201, 'تم رفع المحاضرة بنجاح', lecture);
+  return successResponse(res, 201, ' تم رفع المحاضرة بنجاح شكراً أيها البت العظيم 🥳', lecture);
 });
 
-// تعديل محاضرة
+// ========== تعديل محاضرة ==========
 exports.updateLecture = catchAsync(async (req, res, next) => {
-  console.log('Body:', req.body);
-  console.log('File:', req.file);
-
   const lecture = await Lecture.findById(req.params.id);
 
   if (!lecture) {
@@ -67,19 +104,24 @@ exports.updateLecture = catchAsync(async (req, res, next) => {
 
   if (req.body.title !== undefined) updateData.title = req.body.title;
   if (req.body.description !== undefined) updateData.description = req.body.description;
-  if (req.body.isPublished !== undefined) updateData.isPublished = req.body.isPublished === 'true';
+  if (req.body.isPublished !== undefined) {
+    updateData.isPublished = req.body.isPublished === 'true' || req.body.isPublished === true;
+  }
 
   if (req.file) {
+    // حذف الملف القديم
     await cloudinary.uploader.destroy(lecture.publicId, {
       resource_type: getResourceType(lecture.fileUrl),
     });
-;
-    const result = await uploadToCloudinary(req.file.buffer);
+    
+    // استخراج نوع الملف الجديد
+    const correctFileType = getMimeTypeFromFileName(req.file.originalname);
+    const result = await uploadToCloudinary(req.file.buffer, correctFileType);
 
     updateData.fileUrl = result.secure_url;
     updateData.publicId = result.public_id;
     updateData.fileSize = req.file.size;
-    updateData.fileType = req.file.mimetype;
+    updateData.fileType = correctFileType;
   }
 
   const updated = await Lecture.findByIdAndUpdate(
@@ -91,7 +133,7 @@ exports.updateLecture = catchAsync(async (req, res, next) => {
   return successResponse(res, 200, 'تم تحديث المحاضرة بنجاح', updated);
 });
 
-// حذف محاضرة
+// ========== حذف محاضرة ==========
 exports.deleteLecture = catchAsync(async (req, res, next) => {
   const lecture = await Lecture.findById(req.params.id);
 
@@ -108,7 +150,7 @@ exports.deleteLecture = catchAsync(async (req, res, next) => {
   return successResponse(res, 200, 'تم حذف المحاضرة بنجاح', null);
 });
 
-// تحميل محاضرة
+// ========== تحميل محاضرة ==========
 exports.downloadLecture = catchAsync(async (req, res, next) => {
   const lecture = await Lecture.findById(req.params.id);
 
@@ -119,27 +161,23 @@ exports.downloadLecture = catchAsync(async (req, res, next) => {
   if (!lecture.isPublished) {
     return next(new AppError('هذه المحاضرة غير منشورة', 403));
   }
+  let directDownloadUrl = lecture.fileUrl;
+  
+  if (directDownloadUrl.includes('/upload/')) {
+   
+    directDownloadUrl = directDownloadUrl.replace('/upload/', '/upload/fl_attachment/');
+  }
 
-  const response = await axios({
-    method: 'GET',
-    url: lecture.fileUrl,
-    responseType: 'stream',
+  return successResponse(res, 200, 'success', {
+    downloadUrl: directDownloadUrl,
+    title: lecture.title,
+    fileType: lecture.fileType,
+    fileSize: lecture.fileSize,
   });
-
-  const extension = lecture.fileUrl.split('.').pop().split('?')[0];
-  const filename = `${lecture.title}.${extension}`;
-
-  res.setHeader('Content-Type', lecture.fileType || 'application/octet-stream');
-  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
-  res.setHeader('Content-Length', lecture.fileSize);
-
-  response.data.pipe(res);
 });
-
 exports.getAllLectures = factory.getAll(Lecture);
 exports.getLecture = factory.getOne(Lecture);
 
-//  عدد المحاضرات من كل مادة
 exports.getLecturesCountPerSubject = catchAsync(async (req, res, next) => {
   const data = await Lecture.aggregate([
     {
@@ -178,7 +216,6 @@ exports.getLecturesCountPerSubject = catchAsync(async (req, res, next) => {
   return successResponse(res, 200, 'success', data);
 });
 
-// 2. محاضرات مادة معينة حسب النوع (عملي أو نظري)
 exports.getLecturesByType = catchAsync(async (req, res, next) => {
   const { subjectId, type } = req.params;
 
@@ -196,11 +233,9 @@ exports.getLecturesByType = catchAsync(async (req, res, next) => {
   );
 });
 
-// 3. محاضرات حسب السنة والفصل والمادة والنوع
 exports.getLecturesByYearSemesterSubjectType = catchAsync(async (req, res, next) => {
   const { yearId, semesterId, subjectId, type } = req.params;
 
-  // تحقق من المادة تابعة للسنة والفصل
   const subject = await require('../models/subjectModel').findOne({
     _id: subjectId,
     yearId,

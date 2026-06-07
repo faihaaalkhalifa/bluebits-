@@ -1,4 +1,4 @@
-// routes/lectureRoutes.js
+
 const express = require('express');
 const lectureController = require('../controllers/lectureController');
 const { protect, restrictTo } = require('../middlewares/authMiddlewers');
@@ -18,7 +18,6 @@ router
     restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
     uploadLecture.single('lecture'),
     (req, res, next) => {
-  
       console.log('Body after multer:', req.body);
       next();
     },
@@ -32,7 +31,7 @@ router
     lectureController.getLecture
   )
    .patch(
-    restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    restrictTo('ADMIN', 'SUPER_ADMIN'),
     (req, res, next) => {
       uploadLecture.single('lecture')(req, res, (err) => {
         if (err instanceof multer.MulterError) {
