@@ -2,7 +2,7 @@ const Subject = require('../models/subjectModel');
 const factory = require('../utils/handlerFactory');
 const catchAsync = require('../utils/catchAsync');
 const { successResponse } = require('../utils/response');
-
+const mongoose = require('mongoose');
 exports.setCreatedBy = (req, res, next) => {
   req.body.createdBy = req.user._id;
   next();
@@ -15,7 +15,11 @@ exports.updateSubject = factory.updateOne(Subject);
 exports.deleteSubject = factory.deleteOne(Subject);
 exports.getSubjectsByYear = catchAsync(async (req, res, next) => {
   const { yearId } = req.params;
-  const subjects = await Subject.find({ yearId });
+
+  const subjects = await Subject.find({ 
+    yearId: new mongoose.Types.ObjectId(yearId)
+  });
+
   return successResponse(
     res,
     200,
@@ -25,7 +29,10 @@ exports.getSubjectsByYear = catchAsync(async (req, res, next) => {
 });
 exports.getSubjectsBySemester = catchAsync(async (req, res, next) => {
   const { semesterId } = req.params;
-  const subjects = await Subject.find({ semesterId });
+
+  const subjects = await Subject.find({ 
+    semesterId: new mongoose.Types.ObjectId(semesterId)
+  });
 
   return successResponse(
     res,
@@ -34,10 +41,14 @@ exports.getSubjectsBySemester = catchAsync(async (req, res, next) => {
     { count: subjects.length, subjects }
   );
 });
+
 exports.getSubjectsByYearAndSemester = catchAsync(async (req, res, next) => {
   const { yearId, semesterId } = req.params;
-  
-  const subjects = await Subject.find({ yearId, semesterId });
+
+  const subjects = await Subject.find({ 
+    yearId: new mongoose.Types.ObjectId(yearId),
+    semesterId: new mongoose.Types.ObjectId(semesterId)
+  });
 
   return successResponse(
     res,
