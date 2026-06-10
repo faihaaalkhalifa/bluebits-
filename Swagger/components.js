@@ -364,3 +364,60 @@ exports.updateLecture = {
     lecture: { type: "string", format: "binary" },
   },
 };
+
+// ============ YEAR SCHEMAS ============
+
+exports.Year = {
+  type: "object",
+  properties: {
+    _id: { type: "string", example: "6a12078e8719e7571f0662d6" },
+    name: { type: "string", example: "Year 1" },
+    order: { type: "number", example: 1 },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
+  },
+};
+
+exports.createYear = {
+  type: "object",
+  required: ["name", "order"],
+  properties: {
+    name: { type: "string", example: "Year 1" },
+    order: { type: "number", example: 1 },
+  },
+};
+
+exports.updateYear = {
+  type: "object",
+  properties: {
+    name: { type: "string", example: "Year 2" },
+    order: { type: "number", example: 2 },
+  },
+};
+
+// ============ SEMESTER SCHEMAS ============
+
+exports.Semester = {
+  type: "object",
+  properties: {
+    _id: { type: "string", example: "6a12078e8719e7571f0662d7" },
+    name: { type: "string", example: "Semester 1" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
+  },
+};
+
+exports.createSemester = {
+  type: "object",
+  required: ["name"],
+  properties: {
+    name: { type: "string", example: "Semester 1" },
+  },
+};
+
+exports.updateSemester = {
+  type: "object",
+  properties: {
+    name: { type: "string", example: "Semester 2" },
+  },
+};
