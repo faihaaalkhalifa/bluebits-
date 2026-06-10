@@ -94,7 +94,11 @@ const lectureRouter = require('./routes/lectureRoutes');
 const subjectRouter = require('./routes/subjectRoutes');
 const yearRouter = require('./routes/yearRoutes');
 const semesterRouter = require('./routes/semesterRoutes');
+const commentRouter = require('./routes/commentRoutes');
+const reactionRouter = require('./routes/reactionRoutes');
 
+app.use('/api/v1.0.0/comments', commentRouter);
+app.use('/api/v1.0.0/reactions', reactionRouter);
 app.use('/api/v1.0.0/years', yearRouter);
 app.use('/api/v1.0.0/semesters', semesterRouter);
 app.use('/api/v1.0.0/subjects', subjectRouter);
