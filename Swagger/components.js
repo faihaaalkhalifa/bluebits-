@@ -421,3 +421,76 @@ exports.updateSemester = {
     name: { type: "string", example: "Semester 2" },
   },
 };
+
+// ============ COMMENT SCHEMAS ============
+
+exports.Comment = {
+  type: "object",
+  properties: {
+    _id: { type: "string", example: "6a2abc1234567890abcdef12" },
+    content: { type: "string", example: "محاضرة ممتازة شكراً دكتور" },
+    userId: {
+      type: "object",
+      properties: {
+        _id: { type: "string", example: "69ee50bff8208eb66bcc3cc0" },
+        name: { type: "string", example: "faihaa" },
+        profile_image: { type: "string", example: "default.jpg" },
+      },
+    },
+    lectureId: { type: "string", example: "6a25ce948638636fd12b85b3d9d" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
+  },
+};
+
+exports.createComment = {
+  type: "object",
+  required: ["content"],
+  properties: {
+    content: { type: "string", example: "محاضرة ممتازة شكراً دكتور" },
+  },
+};
+
+exports.updateComment = {
+  type: "object",
+  required: ["content"],
+  properties: {
+    content: { type: "string", example: "تعليق معدل" },
+  },
+};
+
+
+// ============ REACTION SCHEMAS ============
+
+exports.Reaction = {
+  type: "object",
+  properties: {
+    _id: { type: "string", example: "6a2abc1234567890abcdef34" },
+    userId: { type: "string", example: "69ee50bff8208eb66bcc3cc0" },
+    lectureId: { type: "string", example: "6a25ce948638636fd12b85b3d9d" },
+    type: { type: "string", enum: ["like", "dislike"], example: "like" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
+  },
+};
+
+exports.createReaction = {
+  type: "object",
+  required: ["type"],
+  properties: {
+    type: { type: "string", enum: ["like", "dislike"], example: "like" },
+  },
+};
+
+exports.LectureReactionsSummary = {
+  type: "object",
+  properties: {
+    likes: { type: "integer", example: 5 },
+    dislikes: { type: "integer", example: 1 },
+    userReaction: {
+      type: "string",
+      enum: ["like", "dislike", null],
+      example: "like",
+    },
+  },
+};
