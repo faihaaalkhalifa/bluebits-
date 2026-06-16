@@ -24,8 +24,31 @@ const app = express();
 app.use(helmet());
 
 // تمكين CORS
-app.use(cors());
-app.options("*", cors());
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:4200',
+      'http://localhost:8080',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean);
+
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // تسجيل الطلبات في وضع التطوير
 if (process.env.NODE_ENV === "development") {
