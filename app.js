@@ -119,7 +119,9 @@ const yearRouter = require('./routes/yearRoutes');
 const semesterRouter = require('./routes/semesterRoutes');
 const commentRouter = require('./routes/commentRoutes');
 const reactionRouter = require('./routes/reactionRoutes');
+const surveyRouter = require('./routes/surveyRoutes');
 
+app.use('/api/v1.0.0/surveys', surveyRouter);
 app.use('/api/v1.0.0/comments', commentRouter);
 app.use('/api/v1.0.0/reactions', reactionRouter);
 app.use('/api/v1.0.0/years', yearRouter);

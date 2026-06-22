@@ -10,9 +10,11 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please tell us your name!"],
       trim: true,
     },
-    year: {
-      type: String,
-    },
+yearId: {
+  type: mongoose.Schema.ObjectId,
+  ref: 'Year',
+  default: null,
+},
     number: {
       type: String,
     },
