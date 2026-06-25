@@ -8,7 +8,7 @@ const { successResponse } = require('../utils/response');
 exports.submitSurveyResponse = catchAsync(async (req, res, next) => {
   const { formId, subjectResponses } = req.body;
 
-  // 1
+  // 1) التحقق من وجود الفورم وحالته
   const form = await SurveyForm.findById(formId);
 
   if (!form) {
@@ -28,26 +28,25 @@ exports.submitSurveyResponse = catchAsync(async (req, res, next) => {
   if (existingResponse) {
     return next(new AppError('لقد أرسلت ردك على هذا الفورم مسبقاً', 400));
   }
-
-  // 3) 
+ 
+  // 
   const subjectIds = [...new Set(subjectResponses.map((r) => r.subjectId))];
-
   const targetYearId = form.yearId._id ? form.yearId._id.toString() : form.yearId.toString();
   const targetSemesterId = form.semesterId._id ? form.semesterId._id.toString() : form.semesterId.toString();
 
-  // (Populated)
+  // 3) التحقق من أن جميع المواد موجودة وتنتمي للفصل الدراسي الحالي (حتى لو كانت مواد حمل)
   const validSubjects = await Subject.find({
     _id: { $in: subjectIds },
-    $and: [
-      { $or: [{ yearId: targetYearId }, { 'yearId._id': targetYearId }] },
-      { $or: [{ semesterId: targetSemesterId }, { 'semesterId._id': targetSemesterId }] }
+    $or: [
+      { semesterId: targetSemesterId }, 
+      { 'semesterId._id': targetSemesterId }
     ]
   });
 
   if (validSubjects.length !== subjectIds.length) {
     return next(
       new AppError(
-        'بعض المواد المُدخلة لا تنتمي لسنتك الدراسية أو فصلك الحالي',
+        'بعض المواد المُدخلة غير موجودة أو لا تنتمي للفصل الدراسي الحالي',
         400
       )
     );
@@ -65,7 +64,6 @@ exports.submitSurveyResponse = catchAsync(async (req, res, next) => {
 
   return successResponse(res, 201, 'شكراً يا بشمهندس ! تم إرسال ردك بنجاح 🎉', response);
 });
-
 exports.getMyResponse = catchAsync(async (req, res, next) => {
 
   const response = await SurveyResponse.findOne({
