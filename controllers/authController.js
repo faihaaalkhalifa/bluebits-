@@ -10,6 +10,66 @@ const signToken = (id) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+
+// Helper function to build password reset URL
+const buildPasswordResetURL = (redirectUrl, token, req) => {
+  const fallbackURL = `${req.protocol}://${req.get("host")}/api/v1.0.0/users/resetPassword/${token}`;
+
+  if (!redirectUrl) {
+    return fallbackURL;
+  }
+
+  const trimmedRedirectUrl = String(redirectUrl).trim();
+  if (!trimmedRedirectUrl) {
+    return fallbackURL;
+  }
+
+  const allowedWebOrigins = (process.env.ALLOWED_WEB_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const allowedMobileSchemes = (process.env.ALLOWED_MOBILE_SCHEMES || "")
+    .split(",")
+    .map((scheme) => scheme.trim())
+    .filter(Boolean);
+
+  const lowerRedirectUrl = trimmedRedirectUrl.toLowerCase();
+  const isAllowedWebOrigin = allowedWebOrigins.some((origin) =>
+    lowerRedirectUrl.startsWith(origin.toLowerCase()),
+  );
+  const isAllowedMobileScheme = allowedMobileSchemes.some((scheme) =>
+    lowerRedirectUrl.startsWith(scheme.toLowerCase()),
+  );
+
+  if (!isAllowedWebOrigin && !isAllowedMobileScheme) {
+    throw new AppError(
+      "redirectUrl is not allowed. Please use one of the configured origins or mobile schemes.",
+      400,
+    );
+  }
+
+  const isValidUrl = /^(https?:\/\/|[a-z][a-z0-9+.-]*:\/\/)/i.test(
+    trimmedRedirectUrl,
+  );
+
+  if (!isValidUrl) {
+    throw new AppError(
+      "redirectUrl must be a valid http(s) URL or custom deep link such as myapp://reset-password",
+      400,
+    );
+  }
+
+  try {
+    const parsedUrl = new URL(trimmedRedirectUrl);
+    parsedUrl.searchParams.set("token", token);
+    return parsedUrl.toString();
+  } catch (err) {
+    const separator = trimmedRedirectUrl.includes("?") ? "&" : "?";
+    return `${trimmedRedirectUrl}${separator}token=${token}`;
+  }
+};
+
 createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
   res.cookie("jwt", token, {
@@ -52,12 +112,10 @@ exports.signup = catchAsync(async (req, res, next) => {
   )}/api/v1.0.0/users/verifyEmail/${verificationToken}`;
 
   //   إرسال الإيميل في الخلفية (بدون انتظار)
-  new Email(newUser, verificationURL)
-    .sendVerification()
-    .catch((err) => {
-      console.error(" فشل إرسال الإيميل في الخلفية:", err);
-      // ما رح نحذف المستخدم، بس نسجل الخطأ
-    });
+  new Email(newUser, verificationURL).sendVerification().catch((err) => {
+    console.error(" فشل إرسال الإيميل في الخلفية:", err);
+    // ما رح نحذف المستخدم، بس نسجل الخطأ
+  });
 
   //  رد للمستخدم فوراً بدون انتظار الإيميل
   return successResponse(
@@ -122,11 +180,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false }); // 3) Send it to user's email
 
   try {
-    const resetURL = `${req.protocol}://${req.get("host")}${req.originalUrl
-      .split("/", 4)
-      .join("/")}/resetPassword/${resetToken}`;
+    const resetURL = buildPasswordResetURL(
+      req.body.redirectUrl,
+      resetToken,
+      req,
+    );
 
-    await new Email(user, resetURL).sendPasswordReset(); //  استبدال الرد القديم بالرد الموحد الجديد
+    await new Email(user, resetURL).sendPasswordReset(); 
 
     return successResponse(
       res,
@@ -233,7 +293,9 @@ exports.resendVerification = catchAsync(async (req, res, next) => {
   }
 
   if (user.isVerified) {
-    return next(new AppError("😁علفكرة تفعيل الحساب مرة وحدة حسابك مفعل ", 400));
+    return next(
+      new AppError("😁على فكرة تفعيل الحساب مرة وحدة حسابك مفعل ", 400),
+    );
   }
 
   if (
@@ -252,11 +314,9 @@ exports.resendVerification = catchAsync(async (req, res, next) => {
   )}/api/v1.0.0/users/verifyEmail/${verificationToken}`;
 
   //  إرسال الإيميل في الخلفية
-  new Email(user, verificationURL)
-    .sendVerification()
-    .catch((err) => {
-      console.error(" فشل إعادة إرسال الإيميل:", err);
-    });
+  new Email(user, verificationURL).sendVerification().catch((err) => {
+    console.error(" فشل إعادة إرسال الإيميل:", err);
+  });
 
   return successResponse(
     res,
