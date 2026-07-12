@@ -120,7 +120,9 @@ const semesterRouter = require('./routes/semesterRoutes');
 const commentRouter = require('./routes/commentRoutes');
 const reactionRouter = require('./routes/reactionRoutes');
 const surveyRouter = require('./routes/surveyRoutes');
+const scheduleRouter = require('./routes/scheduleRoutes');
 
+app.use('/api/v1.0.0/schedule', scheduleRouter);
 app.use('/api/v1.0.0/surveys', surveyRouter);
 app.use('/api/v1.0.0/comments', commentRouter);
 app.use('/api/v1.0.0/reactions', reactionRouter);
