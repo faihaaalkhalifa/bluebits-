@@ -121,7 +121,11 @@ const commentRouter = require('./routes/commentRoutes');
 const reactionRouter = require('./routes/reactionRoutes');
 const surveyRouter = require('./routes/surveyRoutes');
 const scheduleRouter = require('./routes/scheduleRoutes');
+const personalTaskRouter = require('./routes/personalTaskRoutes');
+const academicTaskRouter = require('./routes/academicTaskRoutes');
 
+app.use('/api/v1.0.0/personal-tasks', personalTaskRouter);
+app.use('/api/v1.0.0/academic-tasks', academicTaskRouter);
 app.use('/api/v1.0.0/schedule', scheduleRouter);
 app.use('/api/v1.0.0/surveys', surveyRouter);
 app.use('/api/v1.0.0/comments', commentRouter);
@@ -292,8 +296,10 @@ mongoose
     socketTimeoutMS: 45000,
   })
   .then(() => {
+    const { startTaskAutoClose } = require('./utils/taskCron');
     console.log("Connected to MongoDB successfully");
     console.log(`Database: ${mongoose.connection.name}`);
+    startTaskAutoClose();
 
     // تشغيل الخادم بعد الاتصال الناجح
     const server = app.listen(PORT, "0.0.0.0", () => {
