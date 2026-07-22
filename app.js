@@ -123,7 +123,11 @@ const surveyRouter = require('./routes/surveyRoutes');
 const scheduleRouter = require('./routes/scheduleRoutes');
 const personalTaskRouter = require('./routes/personalTaskRoutes');
 const academicTaskRouter = require('./routes/academicTaskRoutes');
+const announcementRouter = require('./routes/announcementRoutes');
+const aiRouter = require('./routes/aiRoutes');
 
+app.use('/api/v1.0.0/ai', aiRouter);
+app.use('/api/v1.0.0/announcements', announcementRouter);
 app.use('/api/v1.0.0/personal-tasks', personalTaskRouter);
 app.use('/api/v1.0.0/academic-tasks', academicTaskRouter);
 app.use('/api/v1.0.0/schedule', scheduleRouter);
