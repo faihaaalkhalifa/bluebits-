@@ -100,7 +100,7 @@ exports.triggerScheduling = catchAsync(async (req, res, next) => {
     const scheduleData = await generateAggregatedData(req.params.semesterId);
 
     // 2. يشتغل شغلو TIMEFOLD
-    const response = await axios.post('http://localhost:8080/solve', scheduleData);
+    const response = await axios.post('https://exam-solver24.onrender.com/solve', scheduleData);
 
     // 3. استقبال الجدول النهائي
     const finalSchedule = response.data;

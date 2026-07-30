@@ -69,7 +69,7 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
   });
 
   
-  const TIMEFOLD_URL = process.env.TIMEFOLD_API_URL || 'https://exam-solver24.onrender.com';
+  const TIMEFOLD_URL = process.env.TIMEFOLD_API_URL || 'https://exam-solver24.onrender.com/solve';
   let solvedData;
   try {
     const response = await axios.post(TIMEFOLD_URL, {
