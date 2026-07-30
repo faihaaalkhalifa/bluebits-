@@ -69,7 +69,7 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
   });
 
   
-  const TIMEFOLD_URL = process.env.TIMEFOLD_API_URL || 'https://exam-solver24.onrender.com/solve';
+  const TIMEFOLD_URL = process.env.TIMEFOLD_API_URL || 'http://localhost:8081/api/solve';
   let solvedData;
   try {
     const response = await axios.post(TIMEFOLD_URL, {
@@ -81,7 +81,7 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
         timeslotsPerDay: config.timeslotsPerDay,
       },
       exams,
-    }, { timeout: 65000 });
+    }, { timeout:120000 });
     solvedData = response.data;
   } catch (error) {
     return next(new AppError(`فشل الاتصال بـ Timefold: ${error.message}`, 500));
