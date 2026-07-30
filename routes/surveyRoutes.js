@@ -1,6 +1,7 @@
 const express = require('express');
 const surveyFormController = require('../controllers/surveyFormController');
 const surveyResponseController = require('../controllers/surveyResponseController');
+const statsController = require('../controllers/statsController');
 const { protect, restrictTo } = require('../middlewares/authMiddlewers');
 
 const router = express.Router();
@@ -23,6 +24,19 @@ router
     restrictTo('ADMIN', 'SUPER_ADMIN'),
     surveyFormController.createSurveyForm
   );
+
+  router.get(
+  '/stats/year/:yearId',
+  restrictTo('ADMIN', 'SUPER_ADMIN'),
+  statsController.getSubjectsStatsByYear
+);
+
+router.get(
+  '/stats/all-years',
+  restrictTo('ADMIN', 'SUPER_ADMIN'),
+  statsController.getSubjectsStatsAllYears
+);
+
 
 router
   .route('/forms/:id')
@@ -50,6 +64,7 @@ router.get(
   restrictTo('ADMIN', 'SUPER_ADMIN'),
   surveyFormController.getSurveyFormResponses
 );
+
 //من هون بس روتات لطالب
 
 router.post(
