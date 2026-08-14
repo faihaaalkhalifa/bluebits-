@@ -11,5 +11,14 @@ exports.uploadLecture = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 100 * 1024 * 1024 },
 });
-// 1
+
+exports.uploadUserPhoto = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB 
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) return cb(null, true);
+    cb(new AppError('يرجى رفع صورة فقط', 400), false);
+  },
+});
+
 exports.cloudinary = cloudinary;

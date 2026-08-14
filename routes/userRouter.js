@@ -2,7 +2,7 @@ const express = require("express");
 const userController = require("./../controllers/userController");
 const authController = require("../controllers/authController");
 const authMiddlewers = require("../middlewares/authMiddlewers");
-const imguserMiddlewers = require("../middlewares/imguserMiddlewers");
+const { uploadUserPhoto } = require("../config/cloudinary");
 const { protect, restrictTo } = require("./../middlewares/authMiddlewers");
 const rateLimit = require("express-rate-limit");
 const router = express.Router();
@@ -65,7 +65,7 @@ router.patch(
   "/updateMeAndUpload",
   authMiddlewers.protect,
   authMiddlewers.isEmailVerified,
-  imguserMiddlewers.uploadUserPhoto,
+  uploadUserPhoto.single("profile_image"),
   userController.updateMe,
 );
 router.patch(
@@ -114,5 +114,14 @@ router
     authMiddlewers.restrictTo("ADMIN", "SUPER_ADMIN"),
     userController.deleteUser, //حذف مستخدم معين
   );
+
+  router.get(
+  "/year/:yearId",
+  authMiddlewers.protect,
+  authMiddlewers.isactive,
+  authMiddlewers.isEmailVerified,
+  authMiddlewers.restrictTo("ADMIN", "SUPER_ADMIN"),
+  userController.getUsersByYear,
+);
 
 module.exports = router;

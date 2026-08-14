@@ -41,6 +41,11 @@ yearId: {
       type: String,
       default: "default.jpg",
     },
+    
+    profile_image_publicId: {
+  type: String,
+  default: null,
+},
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,

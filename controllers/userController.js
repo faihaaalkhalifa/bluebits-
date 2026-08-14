@@ -2,6 +2,7 @@ const User = require("./../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const factory = require("../utils/handlerFactory");
+const APIFeatures = require("../utils/apiFeatures");
 const mongoose = require("mongoose");
 const { successResponse, errorResponse } = require("../utils/response");
 const filterObj = (obj, ...allowedFields) => {
@@ -18,8 +19,19 @@ exports.getAllUsers = factory.getAll(User);
 // Do NOT update passwords with this!
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
+const streamifier = require('streamifier');
+const { cloudinary } = require('../config/cloudinary');
+
+const uploadUserPhotoToCloudinary = (buffer) =>
+  new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: 'bluebits/users', resource_type: 'image' },
+      (error, result) => (error ? reject(error) : resolve(result))
+    );
+    streamifier.createReadStream(buffer).pipe(uploadStream);
+  });
+
 exports.updateMe = catchAsync(async (req, res, next) => {
-  // 1) Create error if user POSTs password data
   if (req.body.password) {
     return next(
       new AppError(
@@ -27,30 +39,30 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         400,
       ),
     );
-  } 
- const filteredBody = filterObj(
-  req.body,
-  "name",
-  "email", 
-  "profile_image",
-  "yearId", 
-);
-  if (req.file)
-    filteredBody.photo = `${req.protocol}://${req.get("host")}/img/users/${
-      req.file.filename
-    }`; // 3) Update user document
+  }
+
+  const filteredBody = filterObj(req.body, "name", "email", "yearId");
+
+  if (req.file) {
+  
+    const currentUser = await User.findById(req.user.id);
+    if (currentUser.profile_image_publicId) {
+      await cloudinary.uploader
+        .destroy(currentUser.profile_image_publicId, { resource_type: 'image' })
+        .catch(() => {});
+    }
+
+    const result = await uploadUserPhotoToCloudinary(req.file.buffer);
+    filteredBody.profile_image = result.secure_url;
+    filteredBody.profile_image_publicId = result.public_id;
+  }
+
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidators: true,
   });
 
-  // 🚀 استبدال الرد القديم بالرد الموحد الجديد
-  return successResponse(
-    res,
-    200, // رمز الحالة (200 OK)
-    "success", // رسالة النجاح
-    updatedUser, // المستند المُحدَّث يذهب مباشرةً إلى حقل 'data'
-  );
+  return successResponse(res, 200, "success", updatedUser);
 });
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
@@ -67,4 +79,26 @@ exports.activeMe = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
   });
+});
+
+exports.getUsersByYear = catchAsync(async (req, res, next) => {
+  const { yearId } = req.params;
+
+  const features = new APIFeatures(
+    User.find({ yearId: new mongoose.Types.ObjectId(yearId) }),
+    req.query,
+  )
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const users = await features.query;
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${users.length}`,
+    users,
+  );
 });
