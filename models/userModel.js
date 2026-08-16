@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const { RoleCode, levelEnum } = require("../utils/enum");
+const { RoleCode, Permission } = require("../utils/enum");
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -31,6 +31,13 @@ yearId: {
       enum: Object.values(RoleCode),
       default: "USER",
     },
+    
+    permissions: {
+  type: [String],
+  enum: Object.values(Permission),
+  default: [],
+},
+
     password: {
       type: String,
       required: [true, "Please provide a password"],

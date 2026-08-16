@@ -124,4 +124,20 @@ router
   userController.getUsersByYear,
 );
 
+
+router.patch(
+  "/:id/permissions/grant",
+  authMiddlewers.protect,
+  authMiddlewers.restrictTo("SUPER_ADMIN", "ADMIN"),
+  userController.grantPermission,
+);
+
+router.patch(
+  "/:id/permissions/revoke",
+  authMiddlewers.protect,
+  authMiddlewers.restrictTo("SUPER_ADMIN", "ADMIN"),
+  userController.revokePermission,
+);
+
+
 module.exports = router;

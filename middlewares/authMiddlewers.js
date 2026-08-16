@@ -96,3 +96,18 @@ exports.isEmailVerified = (req, res, next) => {
   }
   next();
 };
+
+//role permission
+exports.authorize = (roles = [], permissionKey = null) => {
+  return (req, res, next) => {
+    const hasRole = roles.includes(req.user.role);
+    const hasPermission =
+      permissionKey && req.user.permissions?.includes(permissionKey);
+
+    if (hasRole || hasPermission) return next();
+
+    return next(
+      new AppError("You do not have permission to perform this action", 403),
+    );
+  };
+};

@@ -3,6 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const factory = require("../utils/handlerFactory");
 const APIFeatures = require("../utils/apiFeatures");
+const { Permission } = require("../utils/enum");
 const mongoose = require("mongoose");
 const { successResponse, errorResponse } = require("../utils/response");
 const filterObj = (obj, ...allowedFields) => {
@@ -101,4 +102,39 @@ exports.getUsersByYear = catchAsync(async (req, res, next) => {
     `success, number of documents ${users.length}`,
     users,
   );
+});
+
+
+
+
+exports.grantPermission = catchAsync(async (req, res, next) => {
+  const { permission } = req.body;
+
+  if (!Object.values(Permission).includes(permission)) {
+    return next(new AppError("صلاحية غير معروفة", 400));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { $addToSet: { permissions: permission } }, 
+    { new: true },
+  );
+
+  if (!user) return next(new AppError("المستخدم غير موجود", 404));
+
+  return successResponse(res, 200, `تمت إضافة صلاحية ${permission} بنجاح`, user);
+});
+
+exports.revokePermission = catchAsync(async (req, res, next) => {
+  const { permission } = req.body;
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { $pull: { permissions: permission } },
+    { new: true },
+  );
+
+  if (!user) return next(new AppError("المستخدم غير موجود", 404));
+
+  return successResponse(res, 200, `تم سحب صلاحية ${permission} بنجاح`, user);
 });
