@@ -1,6 +1,7 @@
 const express = require('express');
 const controller = require('../controllers/questionBankController');
-const { protect, restrictTo } = require('../middlewares/authMiddlewers');
+const { protect, restrictTo, authorize } = require('../middlewares/authMiddlewers');
+const { Permission } = require('../utils/enum')
 
 const router = express.Router();
 
@@ -8,13 +9,13 @@ router.use(protect);
 
 router.post(
   '/bulk-upload',
-  restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN','BLUE'),
+  authorize(['ADMIN', 'DOCTOR', 'SUPER_ADMIN'], Permission.CREATE_QUESTION_BANK),
   controller.bulkUploadQuestions
 );
 
 router.post(
   '/upload-docx',
-  restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN','BLUE'),
+  authorize(['ADMIN', 'DOCTOR', 'SUPER_ADMIN'], Permission.CREATE_QUESTION_BANK),
   controller.uploadDocxMiddleware,
   controller.uploadDocx
 );
@@ -42,12 +43,12 @@ router.delete('/:id', restrictTo('ADMIN', 'SUPER_ADMIN'), controller.deleteBank)
 
 router.patch(
   '/questions/:questionId',
-  restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN','BLUE'),
+  authorize(['ADMIN', 'DOCTOR', 'SUPER_ADMIN'], Permission.UPDATE_QUESTION),
   controller.updateQuestion
 );
 router.delete(
   '/questions/:questionId',
-  restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN','BLUE'),
+  authorize(['ADMIN', 'DOCTOR', 'SUPER_ADMIN'], Permission.DELETE_QUESTION),
   controller.deleteQuestion
 );
 

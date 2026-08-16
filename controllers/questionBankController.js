@@ -13,7 +13,7 @@ const { docxBufferToQuestions } = require('../utils/docxToQuestions');
 exports.uploadDocxMiddleware = multer({ storage: multer.memoryStorage() }).single('file');
 
 
-const REVIEW_ROLES = ['ADMIN', 'DOCTOR', 'SUPER_ADMIN','BLUE'];
+const REVIEW_ROLES = ['ADMIN', 'DOCTOR', 'SUPER_ADMIN'];
 
 
 const stripCorrectAnswers = (questions) =>
