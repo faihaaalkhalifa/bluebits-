@@ -31,6 +31,7 @@ const corsOptions = {
       'http://localhost:5173',
       'http://localhost:4200',
       'http://localhost:8080',
+      'https://bluebits-platform24.netlify.app',
       process.env.FRONTEND_URL,
     ].filter(Boolean);
 
