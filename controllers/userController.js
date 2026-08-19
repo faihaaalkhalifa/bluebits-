@@ -106,7 +106,6 @@ exports.getUsersByYear = catchAsync(async (req, res, next) => {
 
 
 
-
 exports.grantPermission = catchAsync(async (req, res, next) => {
   const { permission } = req.body;
 
