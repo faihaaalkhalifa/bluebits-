@@ -41,8 +41,19 @@ const buildPasswordResetURL = (redirectUrl, token, req) => {
   const isAllowedMobileScheme = allowedMobileSchemes.some((scheme) =>
     lowerRedirectUrl.startsWith(scheme.toLowerCase()),
   );
+//front
+  const isLocalhost = lowerRedirectUrl.includes('localhost') || 
+                      lowerRedirectUrl.includes('127.0.0.1') ||
+                      lowerRedirectUrl.includes('10.0.2.2') ||
+                      lowerRedirectUrl.includes('192.168.') ||
+                      lowerRedirectUrl.includes('10.0.');
+// flutter
+  const isResetPath = trimmedRedirectUrl.includes('/reset-password') || 
+                      trimmedRedirectUrl.includes('/reset') ||
+                      trimmedRedirectUrl.includes('/auth/reset');
 
-  if (!isAllowedWebOrigin && !isAllowedMobileScheme) {
+  
+  if (!isAllowedWebOrigin && !isAllowedMobileScheme && !isLocalhost && !isResetPath) {
     throw new AppError(
       "redirectUrl is not allowed. Please use one of the configured origins or mobile schemes.",
       400,
@@ -95,6 +106,10 @@ createSendToken = (user, statusCode, req, res) => {
   //   user,
   // });
 };
+
+
+
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
