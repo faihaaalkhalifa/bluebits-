@@ -16,6 +16,11 @@ router
     academicTaskController.createAcademicTask
   );
 
+
+router.get('/year/:yearId', academicTaskController.getAcademicTasksByYear);
+router.get('/subject/:subjectId', academicTaskController.getAcademicTasksBySubject);
+
+
 router
   .route('/:id')
   .get(academicTaskController.getAcademicTask)

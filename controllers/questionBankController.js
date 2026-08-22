@@ -350,3 +350,27 @@ exports.getBankResults = catchAsync(async (req, res, next) => {
 
   return successResponse(res, 200, `success, number of documents ${attempts.length}`, attempts);
 });
+
+exports.getAllBanksSortedByYearOrder = catchAsync(async (req, res, next) => {
+  const filter = {};
+  if (!REVIEW_ROLES.includes(req.user.role)) filter.status = 'published';
+
+  if (req.query.subjectId) filter.subjectId = req.query.subjectId;
+
+  
+  const banks = await QuestionBank.find(filter);
+
+
+  const sortedBanks = banks.sort((a, b) => {
+    const orderA = a.yearId?.order ?? 0;
+    const orderB = b.yearId?.order ?? 0;
+    return orderA - orderB;
+  });
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${sortedBanks.length}`,
+    sortedBanks
+  );
+});

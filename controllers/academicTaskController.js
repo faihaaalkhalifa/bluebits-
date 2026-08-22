@@ -59,6 +59,44 @@ exports.createAcademicTask = catchAsync(async (req, res, next) => {
   return successResponse(res, 201, 'تم إنشاء التاسك وفتحه للطلاب بنجاح', task);
 });
 
+exports.getAcademicTasksByYear = catchAsync(async (req, res, next) => {
+  const { yearId } = req.params;
+
+  const filter = { yearId };
+  if (!isAdminRole(req.user.role)) filter.status = 'open';
+  if (req.query.status && isAdminRole(req.user.role)) filter.status = req.query.status;
+  if (req.query.subjectId) filter.subjectId = req.query.subjectId;
+  if (req.query.lectureId) filter.lectureId = req.query.lectureId;
+
+  const tasks = await AcademicTask.find(filter).sort('-createdAt');
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${tasks.length}`,
+    tasks
+  );
+});
+
+exports.getAcademicTasksBySubject = catchAsync(async (req, res, next) => {
+  const { subjectId } = req.params;
+
+  const filter = { subjectId };
+  if (!isAdminRole(req.user.role)) filter.status = 'open';
+  if (req.query.status && isAdminRole(req.user.role)) filter.status = req.query.status;
+  if (req.query.yearId) filter.yearId = req.query.yearId;
+  if (req.query.lectureId) filter.lectureId = req.query.lectureId;
+
+  const tasks = await AcademicTask.find(filter).sort('-createdAt');
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${tasks.length}`,
+    tasks
+  );
+});
+
 exports.getAllAcademicTasks = catchAsync(async (req, res, next) => {
   const filter = {};
 

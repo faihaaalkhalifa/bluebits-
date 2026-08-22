@@ -19,7 +19,7 @@ router.post(
   controller.uploadDocxMiddleware,
   controller.uploadDocx
 );
-
+router.get('/sorted-by-year', controller.getAllBanksSortedByYearOrder);
 router.get('/lecture/:lectureId', controller.getBankByLecture);
 router.get('/subject/:subjectId', controller.getBanksBySubject);
 router.get('/year/:yearId', controller.getBanksByYear);
