@@ -127,7 +127,11 @@ const academicTaskRouter = require('./routes/academicTaskRoutes');
 const announcementRouter = require('./routes/announcementRoutes');
 const aiRouter = require('./routes/aiRoutes');
 const questionBankRoutes = require('./routes/questionBankRoutes');
+const doctorLectureRouter = require('./routes/doctorLectureRoutes');
+const doctorQuestionBankRouter = require('./routes/doctorQuestionBankRoutes');
 
+app.use('/api/v1.0.0/doctor/question-banks', doctorQuestionBankRouter);
+app.use('/api/v1.0.0/doctor/lectures', doctorLectureRouter);
 app.use('/api/v1.0.0/question-banks', questionBankRoutes);
 app.use('/api/v1.0.0/ai', aiRouter);
 app.use('/api/v1.0.0/announcements', announcementRouter);
