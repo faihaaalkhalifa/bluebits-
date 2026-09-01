@@ -82,7 +82,7 @@ router
     authMiddlewers.isactive,
     authMiddlewers.isEmailVerified,
     authMiddlewers.restrictTo("ADMIN", "SUPER_ADMIN"),
-    userController.getAllUsers, //,الحصول على جميع المستخدمين
+    userController.getAllUsers, 
   )
   .post(
     authMiddlewers.protect,

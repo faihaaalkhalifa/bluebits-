@@ -14,9 +14,57 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+
+  let filter = {};
+  if (req.params.yearId) {
+    filter.yearId = req.params.yearId;
+  }
+
+ 
+  const page = parseInt(req.query.page) || 1;        
+  const limit = parseInt(req.query.limit) || 10;    
+  const skip = (page - 1) * limit;                   
+
+  
+  const features = new APIFeatures(User.find(filter), req.query)
+    .filter()        
+    .sort()          
+    .limitFields();  
+
+  
+  const query = features.query.skip(skip).limit(limit);
+
+  const users = await query;
+
+  
+  const totalUsers = await User.countDocuments(filter);
+
+  
+  const totalPages = Math.ceil(totalUsers / limit);
+
+  
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+
+  
+  return successResponse(res, 200, `تم جلب المستخدمين بنجاح`, {
+    users,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalUsers,
+      limit,
+      hasNextPage,
+      hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null,
+    }
+  });
+});
+
 exports.createUser = factory.createOne(User);
 exports.getUser = factory.getOne(User);
-exports.getAllUsers = factory.getAll(User);
 // Do NOT update passwords with this!
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
@@ -113,27 +161,42 @@ exports.grantPermission = catchAsync(async (req, res, next) => {
     return next(new AppError("صلاحية غير معروفة", 400));
   }
 
+  
+  const targetUser = await User.findById(req.params.id);
+  if (!targetUser) return next(new AppError("المستخدم غير موجود", 404));
+
+  if (targetUser.role === "USER") {
+    return next(
+      new AppError("لا يمكن إعطاء صلاحيات لمستخدم بدور USER", 400)
+    );
+  }
+
   const user = await User.findByIdAndUpdate(
     req.params.id,
-    { $addToSet: { permissions: permission } }, 
+    { $addToSet: { permissions: permission } },
     { new: true },
   );
-
-  if (!user) return next(new AppError("المستخدم غير موجود", 404));
-
   return successResponse(res, 200, `تمت إضافة صلاحية ${permission} بنجاح`, user);
-});
+});;
+
 
 exports.revokePermission = catchAsync(async (req, res, next) => {
   const { permission } = req.body;
+
+  const targetUser = await User.findById(req.params.id);
+  if (!targetUser) return next(new AppError("المستخدم غير موجود", 404));
+
+  if (targetUser.role === "USER") {
+    return next(
+      new AppError("لا يمكن سحب صلاحيات من مستخدم بدور USER", 400)
+    );
+  }
 
   const user = await User.findByIdAndUpdate(
     req.params.id,
     { $pull: { permissions: permission } },
     { new: true },
   );
-
-  if (!user) return next(new AppError("المستخدم غير موجود", 404));
 
   return successResponse(res, 200, `تم سحب صلاحية ${permission} بنجاح`, user);
 });
