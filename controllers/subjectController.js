@@ -57,3 +57,65 @@ exports.getSubjectsByYearAndSemester = catchAsync(async (req, res, next) => {
     { count: subjects.length, subjects }
   );
 });
+
+
+exports.assignLecturer = catchAsync(async (req, res, next) => {
+  const { lecturerId } = req.body;
+  if (!lecturerId) return next(new AppError('يجب تحديد معرف الدكتور (lecturerId)', 400));
+
+  const lecturer = await mongoose.model('User').findById(lecturerId);
+  if (!lecturer) return next(new AppError('الدكتور غير موجود', 404));
+  if (!['DOCTOR', 'ADMIN', 'SUPER_ADMIN'].includes(lecturer.role)) {
+    return next(new AppError('هذا المستخدم ليس دكتوراً', 400));
+  }
+
+  const subject = await Subject.findByIdAndUpdate(
+    req.params.id,
+    { $addToSet: { lecturerIds: lecturerId } },
+    { new: true, runValidators: true }
+  );
+  if (!subject) return next(new AppError('المادة غير موجودة', 404));
+
+  return successResponse(res, 200, 'تم إسناد المادة للدكتور بنجاح', subject);
+});
+
+
+exports.unassignLecturer = catchAsync(async (req, res, next) => {
+  const { lecturerId } = req.body;
+  if (!lecturerId) return next(new AppError('يجب تحديد معرف الدكتور (lecturerId)', 400));
+
+  const subject = await Subject.findByIdAndUpdate(
+    req.params.id,
+    { $pull: { lecturerIds: lecturerId } },
+    { new: true }
+  );
+  if (!subject) return next(new AppError('المادة غير موجودة', 404));
+
+  return successResponse(res, 200, 'تمت إزالة الدكتور من المادة بنجاح', subject);
+});
+
+
+exports.getMySubjects = catchAsync(async (req, res, next) => {
+  const subjects = await Subject.find({ lecturerIds: req.user._id }).sort('-createdAt');
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${subjects.length}`,
+    subjects
+  );
+});
+
+
+exports.getSubjectsByLecturer = catchAsync(async (req, res, next) => {
+  const { lecturerId } = req.params;
+
+  const subjects = await Subject.find({ lecturerIds: lecturerId }).sort('-createdAt');
+
+  return successResponse(
+    res,
+    200,
+    `success, number of documents ${subjects.length}`,
+    subjects
+  );
+});

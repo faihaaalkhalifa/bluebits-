@@ -36,6 +36,18 @@ router
     subjectController.getSubjectsByYearAndSemester
   );
 
+  router.get(
+  '/my-subjects',
+  restrictTo('DOCTOR', 'ADMIN', 'SUPER_ADMIN'),
+  subjectController.getMySubjects
+);
+
+router.get(
+  '/lecturer/:lecturerId',
+  restrictTo('SUPER_ADMIN'),
+  subjectController.getSubjectsByLecturer
+);
+
 router
   .route('/:id')
   .get(
@@ -50,5 +62,17 @@ router
     restrictTo('ADMIN', 'SUPER_ADMIN'),
     subjectController.deleteSubject
   );
+
+
+  router.patch(
+  '/:id/assign-lecturer',
+  restrictTo('SUPER_ADMIN'),
+  subjectController.assignLecturer
+);
+router.patch(
+  '/:id/unassign-lecturer',
+  restrictTo('SUPER_ADMIN'),
+  subjectController.unassignLecturer
+);
 
 module.exports = router;

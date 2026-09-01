@@ -58,6 +58,16 @@ const subjectSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+
+     lecturerIds: {
+      type: [
+        {
+          type: mongoose.Schema.ObjectId,
+          ref: 'User',
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true, versionKey: false }
 );
