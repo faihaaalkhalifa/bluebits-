@@ -15,7 +15,7 @@ router
     lectureController.getAllLectures
   )
   .post(
-    restrictTo('ADMIN', 'DOCTOR', 'SUPER_ADMIN'),
+    restrictTo('ADMIN', 'SUPER_ADMIN'),
     uploadLecture.single('lecture'),
     (req, res, next) => {
       console.log('Body after multer:', req.body);
