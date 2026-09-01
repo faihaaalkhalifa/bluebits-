@@ -9,13 +9,13 @@ router.use(protect);
 
 router.post(
   '/bulk-upload',
-  authorize(['ADMIN', 'DOCTOR', 'SUPER_ADMIN'], Permission.CREATE_QUESTION_BANK),
+  authorize(['ADMIN','SUPER_ADMIN'], Permission.CREATE_QUESTION_BANK),
   controller.bulkUploadQuestions
 );
 
 router.post(
   '/upload-docx',
-  authorize(['ADMIN', 'DOCTOR', 'SUPER_ADMIN'], Permission.CREATE_QUESTION_BANK),
+  authorize(['ADMIN','SUPER_ADMIN'], Permission.CREATE_QUESTION_BANK),
   controller.uploadDocxMiddleware,
   controller.uploadDocx
 );
@@ -34,8 +34,8 @@ router.get(
   controller.getBankResults
 );
 
-router.patch('/:id/publish', restrictTo('ADMIN', 'SUPER_ADMIN'), controller.publishBank);
-router.patch('/:id/unpublish', restrictTo('ADMIN', 'SUPER_ADMIN'), controller.unpublishBank);
+router.patch('/:id/publish', restrictTo('ADMIN','DOCTOR', 'SUPER_ADMIN'), controller.publishBank);
+router.patch('/:id/unpublish', restrictTo('ADMIN','DOCTOR', 'SUPER_ADMIN'), controller.unpublishBank);
 
 
 router.delete('/:id', restrictTo('ADMIN', 'SUPER_ADMIN'), controller.deleteBank);
