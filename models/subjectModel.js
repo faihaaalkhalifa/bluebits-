@@ -29,11 +29,11 @@ const subjectSchema = new mongoose.Schema(
       //ref: 'Department',
     //},
 
-    // FK → SubjectGroup (optional)
-    //groupId: {
-      //type: mongoose.Schema.ObjectId,
-      //ref: 'SubjectGroup',
-    //},
+     groupId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'SubjectGroup',
+      default: null,
+    },
 
      description: {
       type: String,
@@ -75,11 +75,11 @@ const subjectSchema = new mongoose.Schema(
 subjectSchema.pre(/^find/, function (next) {
   this.populate({ path: 'yearId', select: 'name order' })
       .populate({ path: 'semesterId', select: 'name' })
-      //.populate({ path: 'departmentId', select: 'name' })
-      //.populate({ path: 'groupId', select: 'name' })
-      .populate({ path: 'createdBy', select: 'name email' });
+      .populate({ path: 'createdBy', select: 'name email' })
+      .populate({ path: 'lecturerIds', select: 'name email role' })
+      .populate({ path: 'groupId', select: 'name' }); 
   next();
-});
+})
 
 const Subject = mongoose.model('Subject', subjectSchema);
 module.exports = Subject;

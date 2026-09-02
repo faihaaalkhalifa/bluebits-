@@ -129,7 +129,9 @@ const aiRouter = require('./routes/aiRoutes');
 const questionBankRoutes = require('./routes/questionBankRoutes');
 const doctorLectureRouter = require('./routes/doctorLectureRoutes');
 const doctorQuestionBankRouter = require('./routes/doctorQuestionBankRoutes');
+const subjectGroupRouter = require('./routes/subjectGroupRoutes');
 
+app.use('/api/v1.0.0/subject-groups', subjectGroupRouter);
 app.use('/api/v1.0.0/doctor/question-banks', doctorQuestionBankRouter);
 app.use('/api/v1.0.0/doctor/lectures', doctorLectureRouter);
 app.use('/api/v1.0.0/question-banks', questionBankRoutes);
