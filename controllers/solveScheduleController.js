@@ -11,13 +11,14 @@ const { successResponse } = require('../utils/response');
 exports.solveAndSave = catchAsync(async (req, res, next) => {
   const { semesterId, academicYear } = req.body;
 
- 
+
   const config = await ScheduleConfig.findOne({ semesterId });
   if (!config) return next(new AppError('لم يتم ضبط إعدادات الجدولة لهذا الفصل', 404));
 
-
+  
   const form = await SurveyForm.findOne({ semesterId }).sort('-createdAt');
   if (!form) return next(new AppError('لا يوجد فورم لهذا الفصل', 404));
+
 
   const surveyStats = await SurveyResponse.aggregate([
     { $match: { formId: form._id } },
@@ -34,23 +35,51 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
 
   const statsMap = {};
   surveyStats.forEach((s) => { statsMap[s._id.toString()] = s; });
-
- 
   const subjects = await Subject.find({ semesterId })
     .populate('yearId', 'name order')
-    .populate('semesterId', 'name');
+    .populate('semesterId', 'name')
+    .populate('groupId', 'name');
 
   if (!subjects.length) return next(new AppError('لا توجد مواد لهذا الفصل', 404));
+
+  const groupFixedMap = {}; // groupId -> { examDate, timeslot }
+
+  subjects.forEach((subject) => {
+    const subjectId = subject._id.toString();
+    const groupId = subject.groupId ? subject.groupId._id.toString() : null;
+    const fixedConfig = config.fixedSubjects?.find(
+      (fs) => fs.subjectId.toString() === subjectId
+    );
+    if (groupId && fixedConfig && !groupFixedMap[groupId]) {
+      groupFixedMap[groupId] = {
+        examDate: fixedConfig.examDate,
+        timeslot: fixedConfig.timeslot,
+      };
+    }
+  });
 
 
   const exams = subjects.map((subject) => {
     const subjectId = subject._id.toString();
     const stats = statsMap[subjectId] || {};
-    const adminConfig = config.subjectsConfig?.find(
+
+    const adminSubjectConfig = config.subjectsConfig?.find(
       (sc) => sc.subjectId.toString() === subjectId
     );
 
-    const carryingCount = adminConfig?.carriedStudentsCount ?? stats.carryingCount ?? 0;
+    const groupId = subject.groupId ? subject.groupId._id.toString() : null;
+
+  
+    let fixedConfig = config.fixedSubjects?.find(
+      (fs) => fs.subjectId.toString() === subjectId
+    );
+
+    
+    if (!fixedConfig && groupId && groupFixedMap[groupId]) {
+      fixedConfig = groupFixedMap[groupId];
+    }
+
+    const carryingCount = adminSubjectConfig?.carriedStudentsCount ?? stats.carryingCount ?? 0;
     const avgPreferredDays = stats.avgPreferredDays ?? 3;
     const avgDifficulty = stats.avgDifficulty ?? 3;
 
@@ -65,12 +94,23 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
       priority,
       avgPreferredDaysBefore: Math.round(avgPreferredDays),
       carryingCount,
+      groupId,
+      isFixed: !!fixedConfig,
+      fixedDate: fixedConfig
+        ? new Date(fixedConfig.examDate).toISOString().substring(0, 10) // yyyy-MM-dd
+        : null,
+      fixedTimeslot: fixedConfig ? fixedConfig.timeslot : null,
     };
   });
 
   
-  const TIMEFOLD_URL = process.env.TIMEFOLD_API_URL || 'http://localhost:8081/api/solve';
+  const TIMEFOLD_URL = process.env.TIMEFOLD_API_URL ||'http://localhost:8081/api/solve';
   let solvedData;
+  console.log('=== FIXED EXAMS DEBUG ===');
+exams.filter(e => e.isFixed).forEach(e => {
+  console.log(JSON.stringify(e, null, 2));
+});
+console.log('=========================');
   try {
     const response = await axios.post(TIMEFOLD_URL, {
       examPeriod: {
@@ -81,12 +121,11 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
         timeslotsPerDay: config.timeslotsPerDay,
       },
       exams,
-    }, { timeout:120000 });
+    }, { timeout: 120000 });
     solvedData = response.data;
   } catch (error) {
     return next(new AppError(`فشل الاتصال بـ Timefold: ${error.message}`, 500));
   }
-
 
   const scoreStr = solvedData.score || '0hard/0medium/0soft';
   const hardScore = parseInt(scoreStr.split('hard')[0]) || 0;
@@ -101,7 +140,6 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
       timeslot: exam.examSlot.slotIndex,
     }));
 
- 
   await ExamSchedule.findOneAndDelete({ semesterId });
 
   const finalSchedule = await ExamSchedule.create({
@@ -115,9 +153,6 @@ exports.solveAndSave = catchAsync(async (req, res, next) => {
   return successResponse(res, 201, 'تم توليد الجدول وحفظه بنجاح ', finalSchedule);
 });
 
-
-
-
 exports.getSchedule = catchAsync(async (req, res, next) => {
   const schedule = await ExamSchedule.findOne({
     semesterId: req.params.semesterId,
@@ -126,8 +161,6 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
   return successResponse(res, 200, 'success', schedule);
 });
 
-
-
 exports.publishSchedule = catchAsync(async (req, res, next) => {
   const schedule = await ExamSchedule.findOneAndUpdate(
     { semesterId: req.params.semesterId },
@@ -135,5 +168,5 @@ exports.publishSchedule = catchAsync(async (req, res, next) => {
     { new: true }
   );
   if (!schedule) return next(new AppError('لا يوجد جدول لهذا الفصل', 404));
-  return successResponse(res, 200, 'تم نشر الجدول ', schedule);
+  return successResponse(res, 200, 'تم نشر الجدول', schedule);
 });

@@ -83,7 +83,6 @@ exports.deleteGroup = catchAsync(async (req, res, next) => {
   return successResponse(res, 200, 'تم حذف الغروب وفك ارتباط المواد التابعة له', null);
 });
 
-
 exports.addSubjectToGroup = catchAsync(async (req, res, next) => {
   const { subjectId } = req.body;
   if (!subjectId) return next(new AppError('يجب تحديد معرف المادة (subjectId)', 400));
@@ -94,7 +93,7 @@ exports.addSubjectToGroup = catchAsync(async (req, res, next) => {
   const subject = await Subject.findById(subjectId);
   if (!subject) return next(new AppError('المادة غير موجودة', 404));
 
-  // نتأكد إنو المادة من نفس سنة وفصل الغروب (منطقياً لازم يتطابقوا)
+  
   const subjectYearId = subject.yearId._id || subject.yearId;
   const subjectSemesterId = subject.semesterId._id || subject.semesterId;
   const groupYearId = group.yearId._id || group.yearId;
@@ -109,11 +108,29 @@ exports.addSubjectToGroup = catchAsync(async (req, res, next) => {
     );
   }
 
-  subject.groupId = group._id;
-  await subject.save();
+  await Subject.findByIdAndUpdate(
+    subjectId,
+    { groupId: group._id },
+    { new: true }
+  );
 
-  return successResponse(res, 200, 'تمت إضافة المادة إلى الغروب بنجاح', subject);
+  
+  const updatedGroup = await SubjectGroup.findById(group._id)
+    .populate({
+      path: 'subjects',
+      populate: [
+        { path: 'yearId', select: 'name order' },
+        { path: 'semesterId', select: 'name' },
+        { path: 'createdBy', select: 'name email' },
+        { path: 'lecturerIds', select: 'name email role' }
+      ]
+    });
+
+  return successResponse(res, 200, 'تمت إضافة المادة إلى الغروب بنجاح', updatedGroup);
 });
+
+
+
 
 exports.removeSubjectFromGroup = catchAsync(async (req, res, next) => {
   const { subjectId } = req.body;

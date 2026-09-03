@@ -20,6 +20,27 @@ const subjectConfigSchema = new mongoose.Schema(
   { _id: false }
 );
 
+//  كمان فيحاء هي للمواد الثابتة 
+const fixedSubjectSchema = new mongoose.Schema(
+  {
+    subjectId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Subject',
+      required: [true, 'يجب تحديد المادة'],
+    },
+    examDate: {
+      type: Date,
+      required: [true, 'تاريخ الامتحان مطلوب'],
+    },
+    timeslot: {
+      type: Number,
+      required: [true, 'الفترة الزمنية مطلوبة'],
+      min: [1, 'الفترة الزمنية يجب أن تبدأ من 1'],
+    },
+  },
+  { _id: false }
+);
+
 const scheduleConfigSchema = new mongoose.Schema(
   {
     semesterId: {
@@ -58,6 +79,11 @@ const scheduleConfigSchema = new mongoose.Schema(
 
     subjectsConfig: {
       type: [subjectConfigSchema],
+      default: [],
+    },
+
+      fixedSubjects: {
+      type: [fixedSubjectSchema],
       default: [],
     },
     createdBy: {
