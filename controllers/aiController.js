@@ -51,7 +51,7 @@ exports.askAI = catchAsync(async (req, res, next) => {
   contents.push({ role: 'user', parts: [{ text: question }] });
 
   const response = await ai.models.generateContent({
-    model: 'gemini-flash-latest',
+    model: 'gemini-3.5-flash-lite',
     contents,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
